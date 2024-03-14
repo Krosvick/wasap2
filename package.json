@@ -23,5 +23,8 @@
     "express": "^4.18.3",
     "prettier": "^3.2.5",
     "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
   }
 }
