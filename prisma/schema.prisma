@@ -13,27 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 //Tablas pensadas: Usuarios, Amigos, sesion por chat, chat, mensajes.
 
 //IGNORE THIS!!!!
 //better to do this in singular than plural.
 model User {
-  id       String     @id @default(auto()) @map("_id") @db.ObjectId
-  username String     @unique
-  email    String     @unique
+  id       String      @id @default(auto()) @map("_id") @db.ObjectId
+  username String      @unique
+  email    String      @unique
   password String
   contacts Friendlist? @relation("Owner")
 
   //Think moment.
-  friendListPlace Friendlist[] @relation("Contacts", fields: [friendListPlaceIds], references: [id])
-  friendListPlaceIds String[] @db.ObjectId
+  friendListPlace    Friendlist[] @relation("Contacts", fields: [friendListPlaceIds], references: [id])
+  friendListPlaceIds String[]     @db.ObjectId
 }
 
 model Friendlist {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  owner    User @relation("Owner", fields: [userId], references: [id])
-  userId   String @unique @db.ObjectId
-  friends User[] @relation("Contacts", fields: [friendsId], references: [id])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  owner     User     @relation("Owner", fields: [userId], references: [id])
+  userId    String   @unique @db.ObjectId
+  friends   User[]   @relation("Contacts", fields: [friendsId], references: [id])
   friendsId String[] @db.ObjectId
 }
