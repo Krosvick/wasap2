@@ -1,12 +1,19 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response } from "express";
 import fs from "fs";
+import userRouter from "./userRouter";
+import morgan from "morgan";
 
 const app = express();
+app.use(express.json());
+app.use(morgan("dev"));
+
 const port = process.env.PORT || 3000;
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, TypeScript Express!');
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, TypeScript Express!");
 });
+
+app.use("/user", userRouter);
 
 app.get("/login", (req: Request, res: Response) => {
   res.sendFile("pseudoviews/login.html");
@@ -19,7 +26,7 @@ app.get("/login", (req: Request, res: Response) => {
 
     res.send(data);
   })*/
-})
+});
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
