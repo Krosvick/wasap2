@@ -9,6 +9,8 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.get("/login", (req: Request, res: Response) => {
+  res.sendFile("pseudoviews/login.html");
+  /*
   fs.readFile("pseudoviews/login.html", "utf-8", (err, data : string) => {
     if(err) {
       res.send("not loaded!!!!");
@@ -16,7 +18,7 @@ app.get("/login", (req: Request, res: Response) => {
     }
 
     res.send(data);
-  })
+  })*/
 })
 
 app.listen(port, () => {
