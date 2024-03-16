@@ -33,7 +33,9 @@
     "@prisma/client": "^5.11.0",
     "bcrypt": "^5.1.1",
     "bson": "^6.5.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "uuid": "^9.0.1"
   }
 }
