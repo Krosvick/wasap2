@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
-import fs from "fs";
+//import fs from "fs";
 import userRouter from "./userRouter";
 import morgan from "morgan";
+import helmet from "helmet";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
 app.use(morgan("dev"));
 
 const port = process.env.PORT || 3000;
