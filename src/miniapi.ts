@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 import prisma from "./db/prisma";
-import excludeAttribute from "./prisma_helper";
+import {excludeAttrByOne, excludeAttrByMany} from "./prisma_helper";
 
 const app = express();
 
@@ -20,13 +20,14 @@ apiRouter.use("/users", userRouter);
 userRouter.get("/", async (req: Request, res: Response) => {
     const users = await prisma.user.findMany();
     // any la vieja confiable.
-    excludeAttribute(users, "password");
+    excludeAttrByMany(users, "password");
     res.json(users);
 });
 
 userRouter.get("/:uName", async (req: Request, res: Response) => {
     const uName = req.params.uName;
     const user = await prisma.user.findUnique({
+        where: {
             username: uName,
         }
     });
@@ -36,8 +37,8 @@ userRouter.get("/:uName", async (req: Request, res: Response) => {
         return;
     }
 
-    excludeAttribute(user, "password");
-    res.json(user);
+    let saneUser = excludeAttrByOne(user, "password");
+    res.json(saneUser);
 });
 
 // Friend router stuff
