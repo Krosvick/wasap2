@@ -19,6 +19,9 @@ userRouter.post(
           username,
           email,
           password: hashedPassword,
+          contacts: {
+            create: {},
+          },
         },
       })
       .then((user) => {
@@ -65,5 +68,45 @@ userRouter.post(
       });
   },
 );
+
+userRouter.post("/addfriend", async (req: Request, res: Response) => {
+  const { userId, friendUsername } = req.body;
+  const friendId = await prisma.user.findFirst({
+    where: {
+      username: friendUsername,
+    },
+  });
+  if (!friendId) {
+    res.status(404).json({ error: "Friend not found" });
+    return;
+  }
+  if (userId === friendId.id) {
+    res.status(400).json({ error: "You can't add yourself as a friend" });
+    return;
+  }
+  prisma.user
+    .update({
+      where: {
+        id: userId,
+      },
+      data: {
+        contacts: {
+          update: {
+            friends: {
+              connect: {
+                id: friendId.id,
+              },
+            },
+          },
+        },
+      },
+    })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((error) => {
+      res.json({ error: error.message });
+    });
+});
 
 export default userRouter;
