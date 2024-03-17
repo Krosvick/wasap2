@@ -4,7 +4,7 @@ import {excludeAttrByOne, excludeAttrByMany} from "./prisma_helper";
 import { StatusCodes } from "http-status-codes";
 import { STATUS_CODES } from "http";
 
-const app = express();
+//const app = express();
 
 // Define routers
 const apiRouter = Router();
@@ -69,10 +69,13 @@ friendRouter.get("/", async (req: Request, res: Response) => {
 // Mount friendRouter under userRouter
 userRouter.use("/:id/friends", friendRouter);
 
-// Mount apiRouter as the main router
-app.use("/api", apiRouter);
+export default apiRouter;
 
+// Mount apiRouter as the main router
+//app.use("/api", apiRouter);
+
+/*
 // Listen on port 3000
 app.listen(3000, () => {
     console.log(`Server is running at http://localhost:${3000}`);
-});
+});*/

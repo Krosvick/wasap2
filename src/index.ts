@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 //import fs from "fs";
 import userRouter from "./userRouter";
+import apiRouter from "./miniapi";
 import morgan from "morgan";
 import helmet from "helmet";
 
@@ -18,6 +19,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/user", userRouter);
+app.use("/api", apiRouter);
 
 app.get("/login", (req: Request, res: Response) => {
   res.sendFile("pseudoviews/login.html");
