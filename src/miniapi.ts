@@ -1,12 +1,14 @@
 import express, { Router, Request, Response } from "express";
 import prisma from "./db/prisma";
 import {excludeAttrByOne, excludeAttrByMany} from "./prisma_helper";
+import { StatusCodes } from "http-status-codes";
+import { STATUS_CODES } from "http";
 
 const app = express();
 
 // Define routers
 const apiRouter = Router();
-const userRouter = Router();
+const userRouter = Router({mergeParams : true});
 const friendRouter = Router({ mergeParams: true });
 
 // API Base stuff
@@ -42,9 +44,26 @@ userRouter.get("/:uName", async (req: Request, res: Response) => {
 });
 
 // Friend router stuff
-friendRouter.get("/", (req: Request, res: Response) => {
+friendRouter.get("/", async (req: Request, res: Response) => {
+    const uName = req.params.id;
+    
+    if (!uName) {
+        res.send("Not valid user?");
+        return;
+    }
+
+    const userObj = await prisma.user.findUnique({where : {username : uName}});
+
+    if (userObj === null) {
+        res.status(StatusCodes.NOT_FOUND).send("User not found!");
+        return;
+    }
+
+    const friends = userObj.friendListPlaceIds;
+
+    res.json(friends);
     // Logic to handle fetching friends
-    res.send("List of friends");
+    //res.send("List of friends");
 });
 
 // Mount friendRouter under userRouter
