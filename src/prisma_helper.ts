@@ -1,5 +1,5 @@
-function excludeAttrByMany(obj : object[], key : string) {
-    Object.values(obj).forEach(data => delete (data as any)[key])
+function excludeAttrByMany<T extends object>(obj: T[], key: keyof T): void {
+    obj.forEach(data => delete data[key]);
 }
 
 function excludeAttrByOne(obj : object, keyToDelete : string) {
