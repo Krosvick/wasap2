@@ -1,8 +1,7 @@
-import express, { Router, Request, Response } from "express";
+import { Router, Request, Response } from "express";
 import prisma from "../db/prisma";
 import { excludeAttrByOne, excludeAttrByMany } from "../prisma_helper";
 import { StatusCodes } from "http-status-codes";
-import { STATUS_CODES } from "http";
 
 //const app = express();
 
