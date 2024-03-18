@@ -55,7 +55,7 @@ userRouter.post(
           return;
         }
         const token = generateAccessToken(user.username);
-        res.json({ token });
+        res.cookie("token", token)
       })
       .catch((error) => {
         res.json({ error: error.message });
