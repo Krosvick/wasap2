@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 //import fs from "fs";
-import userRouter from "./userRouter";
-import apiRouter from "./miniapi";
+import userRouter from "./routers/userRouter";
+import apiRouter from "./routers/friend-userRouter";
 import morgan from "morgan";
 import helmet from "helmet";
 

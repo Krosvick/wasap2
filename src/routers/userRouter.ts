@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import prisma from "./db/prisma";
+import prisma from "../db/prisma";
 import jwt from "jsonwebtoken";
-import { validateData } from "./middleware/validationMiddleware";
-import { userRegistrationSchema, userLoginSchema } from "./schemas/userSchema";
+import { validateData } from "../middleware/validationMiddleware";
+import { userRegistrationSchema, userLoginSchema } from "../schemas/userSchema";
 
 const userRouter = Router();
 
