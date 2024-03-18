@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
-import jwt from "jsonwebtoken";
+import { generateAccessToken, authenticateToken } from "../utils/jwt_helpers";
 import { validateData } from "../middleware/validationMiddleware";
-import { userRegistrationSchema, userLoginSchema } from "../schemas/userSchema";
+import { userRegistrationSchema, userLoginSchema, addFriendSchema } from "../schemas/userSchema";
 
 const userRouter = Router();
 
@@ -54,13 +54,7 @@ userRouter.post(
           res.status(401).json({ error: "Invalid password" });
           return;
         }
-        const token = jwt.sign(
-          { id: user.id },
-          process.env.JWT_SECRET as string,
-          {
-            expiresIn: "1h",
-          },
-        );
+        const token = generateAccessToken(user.username);
         res.json({ token });
       })
       .catch((error) => {
@@ -69,7 +63,7 @@ userRouter.post(
   },
 );
 
-userRouter.post("/addfriend", async (req: Request, res: Response) => {
+userRouter.post("/addfriend",[validateData(addFriendSchema), authenticateToken], async (req: Request, res: Response) => {
   const { userId, friendUsername } = req.body;
   const friendId = await prisma.user.findFirst({
     where: {
