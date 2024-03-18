@@ -3,7 +3,11 @@ import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
 import { generateAccessToken, authenticateToken } from "../utils/jwt_helpers";
 import { validateData } from "../middleware/validationMiddleware";
-import { userRegistrationSchema, userLoginSchema, addFriendSchema } from "../schemas/userSchema";
+import {
+  userRegistrationSchema,
+  userLoginSchema,
+  addFriendSchema,
+} from "../schemas/userSchema";
 
 const userRouter = Router();
 
@@ -55,7 +59,8 @@ userRouter.post(
           return;
         }
         const token = generateAccessToken(user.username);
-        res.cookie("token", token)
+        console.log(token);
+        res.cookie("token", token);
       })
       .catch((error) => {
         res.json({ error: error.message });
@@ -63,44 +68,48 @@ userRouter.post(
   },
 );
 
-userRouter.post("/addfriend",[validateData(addFriendSchema), authenticateToken], async (req: Request, res: Response) => {
-  const { userId, friendUsername } = req.body;
-  const friendId = await prisma.user.findFirst({
-    where: {
-      username: friendUsername,
-    },
-  });
-  if (!friendId) {
-    res.status(404).json({ error: "Friend not found" });
-    return;
-  }
-  if (userId === friendId.id) {
-    res.status(400).json({ error: "You can't add yourself as a friend" });
-    return;
-  }
-  prisma.user
-    .update({
+userRouter.post(
+  "/addfriend",
+  [validateData(addFriendSchema), authenticateToken],
+  async (req: Request, res: Response) => {
+    const { userId, friendUsername } = req.body;
+    const friendId = await prisma.user.findFirst({
       where: {
-        id: userId,
+        username: friendUsername,
       },
-      data: {
-        contacts: {
-          update: {
-            friends: {
-              connect: {
-                id: friendId.id,
+    });
+    if (!friendId) {
+      res.status(404).json({ error: "Friend not found" });
+      return;
+    }
+    if (userId === friendId.id) {
+      res.status(400).json({ error: "You can't add yourself as a friend" });
+      return;
+    }
+    prisma.user
+      .update({
+        where: {
+          id: userId,
+        },
+        data: {
+          contacts: {
+            update: {
+              friends: {
+                connect: {
+                  id: friendId.id,
+                },
               },
             },
           },
         },
-      },
-    })
-    .then((user) => {
-      res.json(user);
-    })
-    .catch((error) => {
-      res.json({ error: error.message });
-    });
-});
+      })
+      .then((user) => {
+        res.json(user);
+      })
+      .catch((error) => {
+        res.json({ error: error.message });
+      });
+  },
+);
 
 export default userRouter;
