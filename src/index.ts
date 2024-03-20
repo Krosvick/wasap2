@@ -4,8 +4,13 @@ import userRouter from "./routers/userRouter";
 import apiRouter from "./routers/friend-userRouter";
 import morgan from "morgan";
 import helmet from "helmet";
+import { Server } from "socket.io";
+import { createServer } from "node:http";
 
 const app = express();
+
+const server = createServer(app);
+const io = new Server(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,6 +39,6 @@ app.get("/login", (req: Request, res: Response) => {
   })*/
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
