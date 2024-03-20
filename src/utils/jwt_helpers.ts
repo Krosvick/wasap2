@@ -14,6 +14,19 @@ function generateAccessToken(username: string): string {
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const token = req.headers.authorization;
 
+  if (token == null) return res.sendStatus(StatusCodes.UNAUTHORIZED);
+
+  const verify = jwt.verify(token, process.env.TOKEN_SECRET as string);
+  if (verify) {
+    next();
+  } else {
+    res.statusCode = StatusCodes.UNAUTHORIZED;
+  }
+}
+
+function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) {
+  const token = req.headers.authorization;
+
   if (token == null) return res.sendStatus(401);
 
   const verify = jwt.verify(token, process.env.TOKEN_SECRET as string);
@@ -23,5 +36,6 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
     res.statusCode = StatusCodes.UNAUTHORIZED;
   }
 }
+
 
 export { generateAccessToken, authenticateToken };

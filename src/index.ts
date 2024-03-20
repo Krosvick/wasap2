@@ -8,6 +8,8 @@ import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { join } from "node:path";
 
+const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
+
 const app = express();
 
 app.use(express.json());
@@ -27,7 +29,7 @@ app.use("/user", userRouter);
 app.use("/api", apiRouter);
 
 app.get("/login", (req: Request, res: Response) => {
-  res.sendFile("pseudoviews/login.html");
+  res.sendFile(VIEWS_DIR + "login.html");
   /*
   fs.readFile("pseudoviews/login.html", "utf-8", (err, data : string) => {
     if(err) {
@@ -47,7 +49,7 @@ io.on("connection", () => {
 });
 
 app.get("/socket", (req : Request, res : Response) => {
-  res.sendFile(join(__dirname, "..", "pseudoviews" , "socket_test.html"));
+  res.sendFile(VIEWS_DIR + "socket_test.html");
 })
 
 server.listen(port, () => {

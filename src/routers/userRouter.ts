@@ -41,7 +41,7 @@ userRouter.post(
 userRouter.post(
   "/login",
   validateData(userLoginSchema),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     prisma.user
       .findFirst({
@@ -55,10 +55,12 @@ userRouter.post(
           return;
         }
         const isPasswordValid = bcrypt.compareSync(password, user.password);
+    
         if (!isPasswordValid) {
           res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid password" });
           return;
         }
+
         const token = generateAccessToken(user.username);
         console.log(token);
         res.cookie("token", token);
@@ -89,18 +91,14 @@ userRouter.post("/removefriend",
             return;
         }
 
-        prisma.user.update({
+        prisma.friendlist.update({
             where: {
-                id: userId,
+                userId: userId,
             },
-            data: {
-                contacts: {
-                    update: {
-                        friends: {
-                            delete: [{id: friendId.id}],
-                        }
-                    }
-                }
+            data : {
+              friends: {
+                disconnect: [{id: friendId.id}],
+              }
             }
         }).then(() => {
             res.json({message: `Removed ${friendUsername} from your friendlist.`});
