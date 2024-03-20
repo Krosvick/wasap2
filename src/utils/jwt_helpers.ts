@@ -25,9 +25,10 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
 }
 
 function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) {
-  const token = req.headers.authorization;
+  const token = req.cookies.token;
 
-  if (token == null) return res.sendStatus(401);
+  if (token == null) 
+    return res.sendStatus(StatusCodes.UNAUTHORIZED);
 
   const verify = jwt.verify(token, process.env.TOKEN_SECRET as string);
   if (verify) {
@@ -38,4 +39,4 @@ function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) 
 }
 
 
-export { generateAccessToken, authenticateToken };
+export { generateAccessToken, authenticateToken, authenticateJWTCookie };

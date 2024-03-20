@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
-import { generateAccessToken, authenticateToken } from "../utils/jwt_helpers";
+import { generateAccessToken, authenticateJWTCookie } from "../utils/jwt_helpers";
 import { validateData } from "../middleware/validationMiddleware";
 import {
   userRegistrationSchema,
@@ -9,8 +9,11 @@ import {
   addFriendSchema,
 } from "../schemas/userSchema";
 import { StatusCodes } from "http-status-codes";
+import cookieParser from "cookie-parser";
 
 const userRouter = Router();
+
+userRouter.use(cookieParser());
 
 userRouter.post(
   "/signup",
@@ -41,7 +44,7 @@ userRouter.post(
 userRouter.post(
   "/login",
   validateData(userLoginSchema),
-  async (req: Request, res: Response) => {
+  (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     prisma.user
       .findFirst({
@@ -73,7 +76,7 @@ userRouter.post(
 );
 
 userRouter.post("/removefriend", 
-    [validateData(addFriendSchema), authenticateToken], 
+    [validateData(addFriendSchema), authenticateJWTCookie], 
     async(req: Request, res: Response) => {
         const { userId, friendUsername } = req.body;
 
@@ -110,7 +113,7 @@ userRouter.post("/removefriend",
 
 userRouter.post(
   "/addfriend",
-  [validateData(addFriendSchema), authenticateToken],
+  [validateData(addFriendSchema), authenticateJWTCookie],
   async (req: Request, res: Response) => {
     const { userId, friendUsername } = req.body;
     const friendId = await prisma.user.findFirst({
@@ -151,5 +154,9 @@ userRouter.post(
       });
   },
 );
+
+userRouter.get("/cookie", (req : Request, res : Response) => {
+  res.json({cookies : req.cookies});
+})
 
 export default userRouter;
