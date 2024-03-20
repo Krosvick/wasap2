@@ -6,15 +6,15 @@ import morgan from "morgan";
 import helmet from "helmet";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
+import { join } from "node:path";
 
 const app = express();
 
-const server = createServer(app);
-const io = new Server(server);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+
+//This is only for testing the io external script.
+app.use(helmet({contentSecurityPolicy: false}));
 app.use(morgan("dev"));
 
 const port = process.env.PORT || 3000;
@@ -38,6 +38,17 @@ app.get("/login", (req: Request, res: Response) => {
     res.send(data);
   })*/
 });
+
+const server = createServer(app);
+const io = new Server(server);
+
+io.on("connection", () => {
+  console.log('a user connected');
+});
+
+app.get("/socket", (req : Request, res : Response) => {
+  res.sendFile(join(__dirname, "..", "pseudoviews" , "socket_test.html"));
+})
 
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

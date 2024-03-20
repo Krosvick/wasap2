@@ -12,8 +12,6 @@ import { StatusCodes } from "http-status-codes";
 
 const userRouter = Router();
 
-const AUTH_SCHEMAS = [validateData(addFriendSchema), authenticateToken];
-
 userRouter.post(
   "/signup",
   validateData(userRegistrationSchema),
@@ -72,42 +70,45 @@ userRouter.post(
   },
 );
 
-userRouter.post("/removefriend", AUTH_SCHEMAS, async(req: Request, res: Response) => {
-    const { userId, friendUsername } = req.body;
+userRouter.post("/removefriend", 
+    [validateData(addFriendSchema), authenticateToken], 
+    async(req: Request, res: Response) => {
+        const { userId, friendUsername } = req.body;
 
-    const friendId = await prisma.user.findFirst({
-        where: {
-          username: friendUsername,
-        },
-        select: {
-            id: true,
+        const friendId = await prisma.user.findFirst({
+            where: {
+            username: friendUsername,
+            },
+            select: {
+                id: true,
+            }
+        });
+
+        if(!friendId || userId === friendId.id) {
+            res.status(StatusCodes.FORBIDDEN).json({error: "There is no friend to be deleted."});
+            return;
         }
-      });
 
-      if(!friendId || userId === friendId.id) {
-        res.status(StatusCodes.FORBIDDEN).json({error: "There is no friend to be deleted."});
-        return;
-      }
-
-      prisma.user.update({
-        where: {
-            id: userId,
-        },
-        data: {
-            contacts: {
-                update: {
-                    friends: {
-                        delete: [{id: friendId.id}],
+        prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                contacts: {
+                    update: {
+                        friends: {
+                            delete: [{id: friendId.id}],
+                        }
                     }
                 }
             }
-        }
-      }).then(() => {
-        res.json({message: `Removed ${friendUsername} from your friendlist.`});
-      }).catch((err) => {
-        res.json({message : err.message});
-      });
-})
+        }).then(() => {
+            res.json({message: `Removed ${friendUsername} from your friendlist.`});
+        }).catch((err) => {
+            res.json({message : err.message});
+        });
+    }
+)
 
 userRouter.post(
   "/addfriend",
