@@ -12,7 +12,7 @@ function generateAccessToken(username: string): string {
 }
 
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization;
 
   if (token == null) return res.sendStatus(401);
 
