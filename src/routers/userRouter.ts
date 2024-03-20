@@ -8,6 +8,7 @@ import {
   userLoginSchema,
   addFriendSchema,
 } from "../schemas/userSchema";
+import { StatusCodes } from "http-status-codes";
 
 const userRouter = Router();
 
@@ -50,12 +51,12 @@ userRouter.post(
       })
       .then((user) => {
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
           return;
         }
         const isPasswordValid = bcrypt.compareSync(password, user.password);
         if (!isPasswordValid) {
-          res.status(401).json({ error: "Invalid password" });
+          res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid password" });
           return;
         }
         const token = generateAccessToken(user.username);
@@ -79,11 +80,11 @@ userRouter.post(
       },
     });
     if (!friendId) {
-      res.status(404).json({ error: "Friend not found" });
+      res.status(StatusCodes.NOT_FOUND).json({ error: "Friend not found" });
       return;
     }
     if (userId === friendId.id) {
-      res.status(400).json({ error: "You can't add yourself as a friend" });
+      res.status(StatusCodes.BAD_REQUEST).json({ error: "You can't add yourself as a friend" });
       return;
     }
     prisma.user
