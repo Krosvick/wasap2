@@ -22,21 +22,22 @@ model User {
   username String      @unique
   email    String      @unique
   password String
-  contacts Friendlist? @relation("Owner")
+  friendList Friendlist? @relation("Owner")
+  
   conversations Conversation[] @relation("Participants", fields: [conversationsId], references: [id])
   conversationsId String[] @db.ObjectId
 
   //Think moment.
-  friendListPlace    Friendlist[] @relation("Contacts", fields: [friendListPlaceIds], references: [id])
-  friendListPlaceIds String[]     @db.ObjectId
+  inFriendLists    Friendlist[] @relation("Contacts", fields: [friendListIds], references: [id])
+  friendListIds    String[]     @db.ObjectId
 }
 
 model Friendlist {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   owner     User     @relation("Owner", fields: [userId], references: [id])
   userId    String   @unique @db.ObjectId
-  friends   User[]   @relation("Contacts", fields: [friendsId], references: [id])
-  friendsId String[] @db.ObjectId
+  userFriends   User[]   @relation("Contacts", fields: [userFriendsId], references: [id])
+  userFriendsId String[] @db.ObjectId
 }
 
 model Message {
@@ -44,8 +45,7 @@ model Message {
   content   String
   conversation  Conversation @relation("Messages", fields: [conversationId], references: [id])
   conversationId String @db.ObjectId
-  readed    Boolean? @default(false)
-  isEdited  Boolean? @default(false)
+  readed    Boolean @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -54,7 +54,4 @@ model Conversation {
   messages  Message[] @relation("Messages")
   participants User[] @relation("Participants" , fields: [participantsId], references: [id])
   participantsId String[] @db.ObjectId
-
-  createdAt DateTime @default(now())
-
 }
