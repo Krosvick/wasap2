@@ -17,6 +17,6 @@ export const userLoginSchema = z
   });
 
 export const addFriendSchema = z.object({
-  userId: z.number(),
+  userId: z.string(),
   friendUsername: z.string(),
 });
