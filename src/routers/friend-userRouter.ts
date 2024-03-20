@@ -19,9 +19,14 @@ apiRouter.get("/", (req: Request, res: Response) => {
 apiRouter.use("/users", userRouter);
 
 userRouter.get("/", async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany();
-  // any la vieja confiable.
-  excludeAttrByMany(users, "password");
+  const users = await prisma.user.findMany({
+    select : {
+      id: true,
+      username: true,
+      email : true,
+    }
+  });
+
   res.json(users);
 });
 
@@ -31,6 +36,12 @@ userRouter.get("/:uName", async (req: Request, res: Response) => {
     where: {
       username: uName,
     },
+    select: {
+      id: true,
+      username : true,
+      email: true,
+      contacts: true,
+    }
   });
 
   if (!user) {
@@ -38,8 +49,7 @@ userRouter.get("/:uName", async (req: Request, res: Response) => {
     return;
   }
 
-  let saneUser = excludeAttrByOne(user, "password");
-  res.json(saneUser);
+  res.json(user);
 });
 
 // Friend router stuff
