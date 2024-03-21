@@ -1,6 +1,5 @@
 import { Router, Request, Response } from "express";
 import prisma from "../db/prisma";
-import { excludeAttrByOne, excludeAttrByMany } from "../prisma_helper";
 import { StatusCodes } from "http-status-codes";
 
 //const app = express();
@@ -20,11 +19,11 @@ apiRouter.use("/users", userRouter);
 
 userRouter.get("/", async (req: Request, res: Response) => {
   const users = await prisma.user.findMany({
-    select : {
+    select: {
       id: true,
       username: true,
-      email : true,
-    }
+      email: true,
+    },
   });
 
   res.json(users);
@@ -38,10 +37,15 @@ userRouter.get("/:uName", async (req: Request, res: Response) => {
     },
     select: {
       id: true,
-      username : true,
+      username: true,
       email: true,
-      contacts: true,
-    }
+      friendList: {
+        select: {
+          userFriends: true,
+          userFriendsId: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -68,7 +72,7 @@ friendRouter.get("/", async (req: Request, res: Response) => {
     return;
   }
 
-  const friends = userObj.friendListPlaceIds;
+  const friends = userObj.friendListIds;
 
   res.json(friends);
   // Logic to handle fetching friends
@@ -78,7 +82,7 @@ friendRouter.get("/", async (req: Request, res: Response) => {
 // Mount friendRouter under userRouter
 userRouter.use("/:id/friends", friendRouter);
 
-export default apiRouter;
+export { apiRouter, userRouter, friendRouter };
 
 // Mount apiRouter as the main router
 //app.use("/api", apiRouter);

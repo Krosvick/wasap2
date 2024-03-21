@@ -27,7 +27,7 @@ userRouter.post(
           username,
           email,
           password: hashedPassword,
-          contacts: {
+          friendList: {
             create: {},
           },
         },
@@ -99,7 +99,7 @@ userRouter.post("/removefriend",
                 userId: userId,
             },
             data : {
-              friends: {
+              userFriends: {
                 disconnect: [{id: friendId.id}],
               }
             }
@@ -135,9 +135,9 @@ userRouter.post(
           id: userId,
         },
         data: {
-          contacts: {
+          friendList: {
             update: {
-              friends: {
+              userFriends: {
                 connect: {
                   id: friendId.id,
                 },
