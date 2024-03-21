@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
-import { generateAccessToken, authenticateJWTCookie } from "../utils/jwt_helpers";
+import { generateAccessToken, authenticateJWTCookie } from "../middleware/jwtMiddleware";
 import { validateData } from "../middleware/validationMiddleware";
 import {
   userRegistrationSchema,
