@@ -23,6 +23,8 @@ model User {
   email    String      @unique
   password String
   friendList Friendlist? @relation("Owner")
+
+  messagesSent    Message[]
   
   conversations Conversation[] @relation("Participants", fields: [conversationsId], references: [id])
   conversationsId String[] @db.ObjectId
@@ -43,6 +45,8 @@ model Friendlist {
 model Message {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   content   String
+  sender    User   @relation(fields: [senderId], references: [id])
+  senderId  String @db.ObjectId
   conversation  Conversation @relation("Messages", fields: [conversationId], references: [id])
   conversationId String @db.ObjectId
   readed    Boolean @default(false)
