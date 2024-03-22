@@ -1,11 +1,11 @@
 import { Router, Request, Response } from "express";
-import prisma from "../db/prisma";
+import prisma from "../../db/prisma";
 import { StatusCodes } from "http-status-codes";
 
 export const contactsRouter = Router({ mergeParams: true });
 
 contactsRouter.get("/", async (req: Request, res: Response) => {
-  const uName = req.params.id;
+  const uName = req.params.username;
 
   if (!uName) {
     res.send("Not valid user?");

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import prisma from "../db/prisma";
+import prisma from "../../db/prisma";
 
 export const messageRouter = Router({ mergeParams: true });
 
@@ -12,9 +12,7 @@ messageRouter.get("/", async (req: Request, res: Response) => {
         },
       },
     },
-  })
-  
+  });
+
   res.json(messages);
-})
-
-
+});

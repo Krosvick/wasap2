@@ -1,10 +1,8 @@
 import { Router, Request, Response } from "express";
-import { messageRouter } from "./messagesRouter";
-import { contactsRouter } from "./contactsRouter";
+import { messageRouter } from "./userRelated/messagesRouter";
+import { contactsRouter } from "./userRelated/contactsRouter";
 import prisma from "../db/prisma";
 //import { StatusCodes } from "http-status-codes";
-
-//const app = express();
 
 // Define routers
 const usersRouter = Router({ mergeParams: true });
@@ -52,8 +50,8 @@ usersRouter.get("/:uName", async (req: Request, res: Response) => {
 
 // Friend router stuff
 
-// Mount friendRouter under usersRouter
-usersRouter.use("/:id/friends", contactsRouter);
-usersRouter.use("/:uName/messages", messageRouter);
+// Mount additional router for nested resource
+usersRouter.use("/:username/friends", contactsRouter);
+usersRouter.use("/:username/messages", messageRouter);
 
 export { usersRouter };
