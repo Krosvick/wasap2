@@ -39,7 +39,7 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/user", userRouter);
 
 const server = createServer(app);
-const io = new Server(server);
+export const io = new Server(server);
 
 io.on("connection", () => {
   console.log("a user connected");
