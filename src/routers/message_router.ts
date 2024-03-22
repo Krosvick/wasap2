@@ -1,8 +1,7 @@
 import { Router, Request, Response } from "express";
 import prisma from "../db/prisma";
-import { userRouter } from "./friend-userRouter";
 
-const messageRouter = Router({ mergeParams: true });
+export const messageRouter = Router({ mergeParams: true });
 
 messageRouter.get("/", async (req: Request, res: Response) => {
   const messages = await prisma.conversation.findMany({
@@ -18,5 +17,4 @@ messageRouter.get("/", async (req: Request, res: Response) => {
   res.json(messages);
 })
 
-userRouter.use("/:uName/messages", messageRouter);
 

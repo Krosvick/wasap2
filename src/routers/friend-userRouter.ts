@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { messageRouter } from "./message_router";
 import prisma from "../db/prisma";
 import { StatusCodes } from "http-status-codes";
 
@@ -81,6 +82,7 @@ friendRouter.get("/", async (req: Request, res: Response) => {
 
 // Mount friendRouter under userRouter
 userRouter.use("/:id/friends", friendRouter);
+userRouter.use("/:uName/messages", messageRouter);
 
 export { apiRouter, userRouter, friendRouter };
 
