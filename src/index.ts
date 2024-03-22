@@ -1,7 +1,7 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, Router } from "express";
 //import fs from "fs";
 import userRouter from "./routers/userRouter";
-import { apiRouter } from "./routers/friend-userRouter";
+import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
 import helmet from "helmet";
 import { Server } from "socket.io";
@@ -22,24 +22,21 @@ app.use(morgan("dev"));
 const port = process.env.PORT || 3000;
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript Express!");
+  //json response explaining the different api routes
+  res.json({
+    "/api": "Base API route",
+    "/api/users": "Get all users",
+    "/api/users/:uName": "Get a user by username",
+    "/api/users/:uName/friends": "Get a user's friends",
+    "/api/users/:uName/messages": "Get a user's messages",
+  });
 });
 
-app.use("/user", userRouter);
+const apiRouter = Router();
+
 app.use("/api", apiRouter);
-
-app.get("/login", (req: Request, res: Response) => {
-  res.sendFile(VIEWS_DIR + "login.html");
-  /*
-  fs.readFile("pseudoviews/login.html", "utf-8", (err, data : string) => {
-    if(err) {
-      res.send("not loaded!!!!");
-      return;
-    }
-
-    res.send(data);
-  })*/
-});
+apiRouter.use("/users", usersRouter);
+apiRouter.use("/user", userRouter);
 
 const server = createServer(app);
 const io = new Server(server);
