@@ -1,7 +1,10 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
-import { generateAccessToken, authenticateJWTCookie } from "../middleware/jwtMiddleware";
+import {
+  generateAccessToken,
+  authenticateJWTCookie,
+} from "../middleware/jwtMiddleware";
 import { validateData } from "../middleware/validationMiddleware";
 import {
   userRegistrationSchema,
@@ -58,9 +61,11 @@ userRouter.post(
           return;
         }
         const isPasswordValid = bcrypt.compareSync(password, user.password);
-    
+
         if (!isPasswordValid) {
-          res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid password" });
+          res
+            .status(StatusCodes.UNAUTHORIZED)
+            .json({ error: "Invalid password" });
           return;
         }
 
@@ -75,41 +80,49 @@ userRouter.post(
   },
 );
 
-userRouter.post("/removefriend", 
-    [validateData(addFriendSchema), authenticateJWTCookie], 
-    async(req: Request, res: Response) => {
-        const { userId, friendUsername } = req.body;
+userRouter.post(
+  "/removefriend",
+  [validateData(addFriendSchema), authenticateJWTCookie],
+  async (req: Request, res: Response) => {
+    const { userId, friendUsername } = req.body;
 
-        const friendId = await prisma.user.findFirst({
-            where: {
-            username: friendUsername,
-            },
-            select: {
-                id: true,
-            }
-        });
+    const friendId = await prisma.user.findFirst({
+      where: {
+        username: friendUsername,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-        if(!friendId || userId === friendId.id) {
-            res.status(StatusCodes.FORBIDDEN).json({error: "There is no friend to be deleted."});
-            return;
-        }
-
-        prisma.friendlist.update({
-            where: {
-                userId: userId,
-            },
-            data : {
-              userFriends: {
-                disconnect: [{id: friendId.id}],
-              }
-            }
-        }).then(() => {
-            res.json({message: `Removed ${friendUsername} from your friendlist.`});
-        }).catch((err) => {
-            res.json({message : err.message});
-        });
+    if (!friendId || userId === friendId.id) {
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ error: "There is no friend to be deleted." });
+      return;
     }
-)
+
+    prisma.friendlist
+      .update({
+        where: {
+          userId: userId,
+        },
+        data: {
+          userFriends: {
+            disconnect: [{ id: friendId.id }],
+          },
+        },
+      })
+      .then(() => {
+        res.json({
+          message: `Removed ${friendUsername} from your friendlist.`,
+        });
+      })
+      .catch((err) => {
+        res.json({ message: err.message });
+      });
+  },
+);
 
 userRouter.post(
   "/addfriend",
@@ -126,7 +139,9 @@ userRouter.post(
       return;
     }
     if (userId === friendId.id) {
-      res.status(StatusCodes.BAD_REQUEST).json({ error: "You can't add yourself as a friend" });
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "You can't add yourself as a friend" });
       return;
     }
     prisma.user
@@ -146,8 +161,19 @@ userRouter.post(
           },
         },
       })
-      .then((user) => {
-        res.json(user);
+      .then(async (user) => {
+        //create a conversation between the user and the friend
+        await prisma.conversation
+          .create({
+            data: {
+              participants: {
+                connect: [{ id: userId }, { id: friendId.id }],
+              },
+            },
+          })
+          .then((conversation) => {
+            res.json({ user, conversation });
+          });
       })
       .catch((error) => {
         res.json({ error: error.message });
@@ -155,8 +181,8 @@ userRouter.post(
   },
 );
 
-userRouter.get("/cookie", (req : Request, res : Response) => {
-  res.json({cookies : req.cookies});
-})
+userRouter.get("/cookie", (req: Request, res: Response) => {
+  res.json({ cookies: req.cookies });
+});
 
 export default userRouter;
