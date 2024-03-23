@@ -127,20 +127,6 @@ contactsRouter.post(
                 },
               },
             })
-            .then(async (user) => {
-              //create a conversation between the user and the friend
-              await prisma.conversation
-                .create({
-                  data: {
-                    participants: {
-                      connect: [{ id: userId }, { id: friendId.id }],
-                    },
-                  },
-                })
-                .then((conversation) => {
-                  res.json({ user, conversation });
-                });
-            })
             .catch((error) => {
               res.json({ error: error.message });
             });
