@@ -5,8 +5,10 @@ import { generateAccessToken } from "../middleware/jwtMiddleware";
 import { validateRequestBody } from "zod-express-middleware";
 import { userRegistrationSchema, userLoginSchema } from "../schemas/userSchema";
 import { StatusCodes } from "http-status-codes";
+import cookieParser from "cookie-parser";
 
 const authRouter = Router();
+authRouter.use(cookieParser());
 
 authRouter.post(
   "/signup",
@@ -34,40 +36,39 @@ authRouter.post(
   },
 );
 
-authRouter.post(
-  "/login",
-  validateRequestBody(userLoginSchema),
-  (req: Request, res: Response) => {
-    const { username, email, password } = req.body;
-    prisma.user
-      .findFirst({
-        where: {
-          OR: [{ username }, { email }],
-        },
-      })
-      .then((user) => {
-        if (!user) {
-          res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
-          return;
-        }
-        const isPasswordValid = bcrypt.compareSync(password, user.password);
+authRouter.post("/login", validateRequestBody(userLoginSchema), (req, res) => {
+  const { username, email, password } = req.body;
+  prisma.user
+    .findFirst({
+      where: {
+        OR: [{ username }, { email }],
+      },
+    })
+    .then((user) => {
+      if (!user) {
+        res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
+        return;
+      }
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
 
-        if (!isPasswordValid) {
-          res
-            .status(StatusCodes.UNAUTHORIZED)
-            .json({ error: "Invalid password" });
-          return;
-        }
+      if (!isPasswordValid) {
+        res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ error: "Invalid password" });
+        return;
+      }
 
-        const token = generateAccessToken(user.username);
-        console.log(token);
-        res.cookie("token", token);
-        res.json({ token });
-      })
-      .catch((error) => {
-        res.json({ error: error.message });
-      });
-  },
-);
+      const token = generateAccessToken(user.username);
+      console.log(token);
+      res.cookie("token", token);
+      res.json({ token });
+    })
+    .catch((error) => {
+      res.json({ error: error.message });
+    });
+});
+authRouter.get("/cookies", (req: Request, res: Response) => {
+  res.json(req.cookies);
+});
 
 export default authRouter;
