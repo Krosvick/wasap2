@@ -12,9 +12,9 @@ function generateAccessToken(username: string): string {
 }
 
 function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies.token;
+  const token = req.cookies["token"];
 
-  if (token == null) 
+  if (!token) 
     return res.sendStatus(StatusCodes.UNAUTHORIZED);
 
   const verify = jwt.verify(token, process.env.JWT_SECRET as string);

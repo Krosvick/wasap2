@@ -8,11 +8,13 @@ import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
+import cookieParser from "cookie-parser";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
