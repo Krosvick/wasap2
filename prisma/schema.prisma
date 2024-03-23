@@ -22,23 +22,23 @@ model User {
   username String      @unique
   email    String      @unique
   password String
-  friendList Friendlist? @relation("Owner")
+  friendList Friendlist?
 
   messagesSent    Message[]
   
-  conversations Conversation[] @relation("Participants", fields: [conversationsId], references: [id])
+  conversations Conversation[] @relation(fields: [conversationsId], references: [id])
   conversationsId String[] @db.ObjectId
 
   //Think moment.
-  inFriendLists    Friendlist[] @relation("Contacts", fields: [friendListIds], references: [id])
+  inFriendLists    Friendlist[] @relation("friends", fields: [friendListIds], references: [id])
   friendListIds    String[]     @db.ObjectId
 }
 
 model Friendlist {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  owner     User     @relation("Owner", fields: [userId], references: [id])
+  owner     User     @relation(fields: [userId], references: [id])
   userId    String   @unique @db.ObjectId
-  userFriends   User[]   @relation("Contacts", fields: [userFriendsId], references: [id])
+  userFriends   User[]   @relation("friends", fields: [userFriendsId], references: [id])
   userFriendsId String[] @db.ObjectId
 }
 
@@ -47,7 +47,7 @@ model Message {
   content   String
   sender    User   @relation(fields: [senderId], references: [id])
   senderId  String @db.ObjectId
-  conversation  Conversation @relation("Messages", fields: [conversationId], references: [id])
+  conversation  Conversation @relation(fields: [conversationId], references: [id])
   conversationId String @db.ObjectId
   readed    Boolean @default(false)
   createdAt DateTime @default(now())
@@ -55,7 +55,7 @@ model Message {
 
 model Conversation {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  messages  Message[] @relation("Messages")
-  participants User[] @relation("Participants" , fields: [participantsId], references: [id])
+  messages  Message[]
+  participants User[] @relation(fields: [participantsId], references: [id])
   participantsId String[] @db.ObjectId
 }
