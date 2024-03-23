@@ -17,7 +17,7 @@ function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) 
   if (token == null) 
     return res.sendStatus(StatusCodes.UNAUTHORIZED);
 
-  const verify = jwt.verify(token, process.env.TOKEN_SECRET as string);
+  const verify = jwt.verify(token, process.env.JWT_SECRET as string);
   if (verify) {
     next();
   } else {
