@@ -16,6 +16,11 @@ export const userLoginSchema = z
     message: "Either username or email is required",
   });
 
+export const removeFriendSchema = z.object({
+  userId: z.string(),
+  friendUsername: z.string(),
+});
+
 export const addFriendSchema = z.object({
   userId: z.string(),
   friendUsername: z.string(),
