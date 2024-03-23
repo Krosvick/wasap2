@@ -20,6 +20,9 @@ convRoute.get("/", async (req : Request, res : Response) => {
                     //this may look better one-lined.
                     sender: {select: {username: true}},
                     createdAt : true,
+                },
+                orderBy: {
+                    createdAt: "asc",
                 }
             },
         },
