@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { validateData } from "../../middleware/validationMiddleware";
+import { validateRequestBody } from "zod-express-middleware";
 import { sendMessageSchema } from "../../schemas/messagesSchema";
 import { io } from "../..";
 import prisma from "../../db/prisma";
@@ -24,16 +24,13 @@ messageRouter.get("/", async (req: Request, res: Response) => {
 });
 
 messageRouter.post(
-  "/",
-  validateData(sendMessageSchema),
-  async (req: Request, res: Response) => {
-    type bodySchema = z.infer<typeof sendMessageSchema>;
-    const body: bodySchema = req.body;
-    //url is /api/user/:uName/messages
+  "/send",
+  validateRequestBody(sendMessageSchema),
+  async (req, res) => {
     //retrieve the sender from the url
-    const sender = req.params.uName;
-    //retrieve the message from the request body
-    const { message, conversationId } = body;
+    const sender = req.params.username;
+    //retrieve the message and conversationId from the request body
+    const { message, conversationId } = req.body;
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: conversationId,
