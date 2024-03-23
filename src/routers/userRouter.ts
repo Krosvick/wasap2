@@ -143,7 +143,24 @@ userRouter.post(
         },
       })
       .then(async (user) => {
-        //create a conversation between the user and the friend
+        //The user may delete friends so we need to preserve the conversation and load it.
+        const lastConversation = await prisma.conversation.findFirst({
+          where : {
+            participants : {
+              some : {
+                id: {in : [userId, friendId.id]},
+              },
+            },
+            //HACK: Add this boolean because Prisma doesn't have any length based search.
+            isGroup: false,
+          },
+        })
+
+        if(lastConversation !== null) {
+          res.json({message : `Conversation history with ${friendId.username} is already preserved!`});
+          return;
+        }
+        
         await prisma.conversation
           .create({
             data: {
