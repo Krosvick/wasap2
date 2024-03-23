@@ -1,6 +1,5 @@
 import express, { Request, Response, Router } from "express";
 //import fs from "fs";
-import userRouter from "./routers/userRouter";
 import authRouter from "./routers/authRouter";
 import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
@@ -28,9 +27,10 @@ app.get("/", (req: Request, res: Response) => {
   res.json({
     "/api": "Base API route",
     "/api/users": "Get all users",
-    "/api/users/:uName": "Get a user by username",
-    "/api/users/:uName/friends": "Get a user's friends",
-    "/api/users/:uName/messages": "Get a user's messages",
+    "/api/users/:username": "Get a user by username",
+    "/api/users/:username/friends": "Get a user's friends",
+    "api/users/:username/conversations": "Get a user's conversations",
+    "/api/users/:username/messages": "Get a user's messages",
   });
 });
 
@@ -39,7 +39,6 @@ const apiRouter = Router();
 app.use("/api", apiRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
-apiRouter.use("/user", userRouter);
 apiRouter.use("/conversations", convRoute);
 
 const server = createServer(app);
