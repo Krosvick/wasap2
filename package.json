@@ -48,6 +48,7 @@
     "swagger-ui-express": "^5.0.0",
     "tsoa": "^6.1.5",
     "uuid": "^9.0.1",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zod-express-middleware": "^1.4.0"
   }
 }
