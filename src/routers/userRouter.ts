@@ -1,16 +1,8 @@
 import { Router, Request, Response } from "express";
-import bcrypt from "bcrypt";
 import prisma from "../db/prisma";
-import {
-  generateAccessToken,
-  authenticateJWTCookie,
-} from "../middleware/jwtMiddleware";
+import { authenticateJWTCookie } from "../middleware/jwtMiddleware";
 import { validateRequestBody } from "zod-express-middleware";
-import {
-  userRegistrationSchema,
-  userLoginSchema,
-  addFriendSchema,
-} from "../schemas/userSchema";
+import { addFriendSchema } from "../schemas/userSchema";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 
@@ -19,71 +11,9 @@ const userRouter = Router();
 userRouter.use(cookieParser());
 
 userRouter.post(
-  "/signup",
-  validateRequestBody(userRegistrationSchema),
-  (req: Request, res: Response) => {
-    const { username, email, password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    prisma.user
-      .create({
-        data: {
-          username,
-          email,
-          password: hashedPassword,
-          friendList: {
-            create: {},
-          },
-        },
-      })
-      .then((user) => {
-        res.json(user);
-      })
-      .catch((error) => {
-        res.json({ error: error.message });
-      });
-  },
-);
-
-userRouter.post(
-  "/login",
-  validateRequestBody(userLoginSchema),
-  (req: Request, res: Response) => {
-    const { username, email, password } = req.body;
-    prisma.user
-      .findFirst({
-        where: {
-          OR: [{ username }, { email }],
-        },
-      })
-      .then((user) => {
-        if (!user) {
-          res.status(StatusCodes.NOT_FOUND).json({ error: "User not found" });
-          return;
-        }
-        const isPasswordValid = bcrypt.compareSync(password, user.password);
-
-        if (!isPasswordValid) {
-          res
-            .status(StatusCodes.UNAUTHORIZED)
-            .json({ error: "Invalid password" });
-          return;
-        }
-
-        const token = generateAccessToken(user.username);
-        console.log(token);
-        res.cookie("token", token);
-        res.json({ token });
-      })
-      .catch((error) => {
-        res.json({ error: error.message });
-      });
-  },
-);
-
-userRouter.post(
   "/removefriend",
-  [validateRequestBody(addFriendSchema), authenticateJWTCookie],
-  async (req: Request, res: Response) => {
+  validateRequestBody(addFriendSchema), authenticateJWTCookie,
+  async (req, res) => {
     const { userId, friendUsername } = req.body;
 
     const friendId = await prisma.user.findFirst({
@@ -126,8 +56,8 @@ userRouter.post(
 
 userRouter.post(
   "/addfriend",
-  [validateRequestBody(addFriendSchema), authenticateJWTCookie],
-  async (req: Request, res: Response) => {
+  validateRequestBody(addFriendSchema), authenticateJWTCookie,
+  async (req, res) => {
     const { userId, friendUsername } = req.body;
     const friendId = await prisma.user.findFirst({
       where: {

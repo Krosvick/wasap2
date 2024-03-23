@@ -1,6 +1,7 @@
 import express, { Request, Response, Router } from "express";
 //import fs from "fs";
 import userRouter from "./routers/userRouter";
+import authRouter from "./routers/authRouter";
 import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -36,6 +37,7 @@ app.get("/", (req: Request, res: Response) => {
 const apiRouter = Router();
 
 app.use("/api", apiRouter);
+apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/conversations", convRoute);
