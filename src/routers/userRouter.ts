@@ -5,7 +5,7 @@ import {
   generateAccessToken,
   authenticateJWTCookie,
 } from "../middleware/jwtMiddleware";
-import { validateData } from "../middleware/validationMiddleware";
+import { validateRequestBody } from "zod-express-middleware";
 import {
   userRegistrationSchema,
   userLoginSchema,
@@ -20,7 +20,7 @@ userRouter.use(cookieParser());
 
 userRouter.post(
   "/signup",
-  validateData(userRegistrationSchema),
+  validateRequestBody(userRegistrationSchema),
   (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
@@ -46,7 +46,7 @@ userRouter.post(
 
 userRouter.post(
   "/login",
-  validateData(userLoginSchema),
+  validateRequestBody(userLoginSchema),
   (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     prisma.user
@@ -82,7 +82,7 @@ userRouter.post(
 
 userRouter.post(
   "/removefriend",
-  [validateData(addFriendSchema), authenticateJWTCookie],
+  [validateRequestBody(addFriendSchema), authenticateJWTCookie],
   async (req: Request, res: Response) => {
     const { userId, friendUsername } = req.body;
 
@@ -126,7 +126,7 @@ userRouter.post(
 
 userRouter.post(
   "/addfriend",
-  [validateData(addFriendSchema), authenticateJWTCookie],
+  [validateRequestBody(addFriendSchema), authenticateJWTCookie],
   async (req: Request, res: Response) => {
     const { userId, friendUsername } = req.body;
     const friendId = await prisma.user.findFirst({
@@ -144,6 +144,57 @@ userRouter.post(
         .json({ error: "You can't add yourself as a friend" });
       return;
     }
+    const userFriendList = await prisma.friendlist.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!userFriendList) {
+      //create a friendlist for the user if it doesn't exist
+      prisma.friendlist
+        .create({
+          data: {
+            userId: userId,
+          },
+        })
+        .then(() => {
+          prisma.user
+            .update({
+              where: {
+                id: userId,
+              },
+              data: {
+                friendList: {
+                  update: {
+                    userFriends: {
+                      connect: {
+                        id: friendId.id,
+                      },
+                    },
+                  },
+                },
+              },
+            })
+            .then(async (user) => {
+              //create a conversation between the user and the friend
+              await prisma.conversation
+                .create({
+                  data: {
+                    participants: {
+                      connect: [{ id: userId }, { id: friendId.id }],
+                    },
+                  },
+                })
+                .then((conversation) => {
+                  res.json({ user, conversation });
+                });
+            })
+            .catch((error) => {
+              res.json({ error: error.message });
+            });
+        });
+    }
+
     prisma.user
       .update({
         where: {
