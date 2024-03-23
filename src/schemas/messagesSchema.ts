@@ -5,7 +5,12 @@ export const accessRoomSchema = z.object({
   roomId: z.string(),
 });
 
-export const sendMessageSchema = z.object({
-  message: z.string(),
-  conversationId: z.string(),
-});
+export const sendMessageSchema = {
+  params: z.object({
+    username: z.string(),
+    convId: z.string(),
+  }),
+  body: z.object({
+    message: z.string().min(1).max(500),
+  }),
+};
