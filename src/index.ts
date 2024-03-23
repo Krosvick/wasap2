@@ -7,7 +7,7 @@ import helmet from "helmet";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { join } from "node:path";
-import { convRoute } from "./routers/userRelated/conversationsRouter";
+import { convRouter } from "./routers/userRelated/conversationsRouter";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -39,7 +39,7 @@ const apiRouter = Router();
 app.use("/api", apiRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);
-apiRouter.use("/conversations", convRoute);
+apiRouter.use("/conversations", convRouter);
 
 const server = createServer(app);
 export const io = new Server(server);

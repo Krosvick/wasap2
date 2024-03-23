@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { messageRouter } from "./userRelated/messagesRouter";
 import { contactsRouter } from "./userRelated/contactsRouter";
+import { convRouter } from "./userRelated/conversationsRouter";
 import prisma from "../db/prisma";
 
 // Define routers
@@ -47,10 +48,9 @@ usersRouter.get("/:uName", async (req: Request, res: Response) => {
   res.json(user);
 });
 
-
-
 // Mount additional router for nested resource
 usersRouter.use("/:username/friends", contactsRouter);
+usersRouter.use("/:username/conversations", convRouter);
 usersRouter.use("/:username/messages", messageRouter);
 
 export { usersRouter };
