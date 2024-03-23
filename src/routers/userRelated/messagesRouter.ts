@@ -12,11 +12,13 @@ messageRouter.get("/", async (req: Request, res: Response) => {
     where: {
       participants: {
         some: {
-          username: req.params.uName,
+          username: req.params.username,
         },
       },
     },
   });
+
+  //console.log(req.params.uName);
 
   res.json(messages);
 });
