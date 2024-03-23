@@ -49,7 +49,7 @@ model Message {
   senderId  String @db.ObjectId
   conversation  Conversation @relation(fields: [conversationId], references: [id])
   conversationId String @db.ObjectId
-  readed    Boolean @default(false)
+  isSeen    Boolean @default(false)
   createdAt DateTime @default(now())
 }
 
