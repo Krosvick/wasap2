@@ -13,6 +13,8 @@ import cookieParser from "cookie-parser";
 import cookie from "cookie"
 import jwt from "jsonwebtoken";
 import { UserJWT } from "./helpers";
+import prisma from "./db/prisma";
+import { boolean } from "zod";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -60,7 +62,7 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   const cookief = socket.handshake.headers.cookie;
 
-  let user : string | null = null;
+  let user : string = "";
   var sockets = [];
 
   if(cookief) {
@@ -74,17 +76,32 @@ io.on('connection', (socket) => {
     
     const payload = decodedToken.payload as UserJWT;
     console.log("live parsed cookie reaction: ", token);
-    console.log(payload, payload.user);
+    console.log(payload, payload.id);
     
-    user = payload.user;
+    user = payload.id;
   }
 
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
     console.log(`Received message from ${user}:`, data);
+    if (!user) {
+      return;
+    }
+  
+    const userData = prisma.user.findFirst({
+      where: {
+        id: user
+      },
+      select: {
+        username : true,
+      }
+    }).then((user) => {
+      io.emit('chat message', {user : user?.username, message : data.message});
+    }).catch((err) => {
+      console.log("error feo");
+    });
 
-
-    io.emit('chat message', {user : user, message : data.message});
+    //io.emit('chat message', {user : userData?.username, message : data.message});
   });
 
   // Listen for user disconnection
