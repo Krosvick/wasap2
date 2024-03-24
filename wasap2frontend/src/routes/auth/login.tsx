@@ -5,6 +5,8 @@ import { userLoginSchema } from "../../../../src/schemas/userSchema";
 import { z } from "zod";
 import { login } from "../../services/authService";
 
+import { Navigate } from "react-router-dom";
+
 export type UserLogin = z.infer<typeof userLoginSchema>;
 
 export default function LoginPage() {
@@ -19,7 +21,9 @@ export default function LoginPage() {
   const onSubmit: SubmitHandler<UserLogin> = async (data) => {
     try {
       const response = await login(data);
-      console.log(response);
+      if (response.status === 200) {
+        return <Navigate to="/" />;
+      }
     } catch (error) {
       console.error(error);
     }

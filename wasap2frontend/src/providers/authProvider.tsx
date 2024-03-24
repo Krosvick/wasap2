@@ -14,16 +14,17 @@ type ContextJWT = {
 };
 
 const AuthContext = createContext<ContextJWT>({
-  token: null,
+  token: Cookies.get("token") || null,
   setToken: () => {},
 });
-const AuthProvider = ({ children }) => {
+
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // State to hold the authentication token
   //get token from cookie
-  const [token, setToken_] = useState<string>(Cookies.get("token"));
+  const [token, setToken_] = useState<string>(Cookies.get("token") || "");
 
   // Function to set the authentication token
-  const setToken = (newToken) => {
+  const setToken = (newToken: string) => {
     setToken_(newToken);
   };
 
@@ -57,4 +58,3 @@ export const useAuth = () => {
 };
 
 export default AuthProvider;
-
