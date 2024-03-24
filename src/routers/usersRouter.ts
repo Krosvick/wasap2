@@ -21,7 +21,7 @@ usersRouter.get("/", async (req: Request, res: Response) => {
   res.json(users);
 });
 
-usersRouter.get("/:uName", async (req: Request, res: Response) => {
+/*usersRouter.get("/:uName", async (req: Request, res: Response) => {
   const uName = req.params.uName;
   const user = await prisma.user.findUnique({
     where: {
@@ -47,10 +47,38 @@ usersRouter.get("/:uName", async (req: Request, res: Response) => {
 
   res.json(user);
 });
+*/
+
+usersRouter.get("/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const select = {
+    id: true,
+    username: true,
+    email: true,
+    friendList: {
+      select: {
+        userFriendsId: true,
+      },
+    },
+  };
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select,
+  });
+
+  if (!user) {
+    res.send(`No user with id ${userId} was found!`);
+    return;
+  }
+
+  res.json(user);
+});
 
 // Mount additional router for nested resource
-usersRouter.use("/:username/friends", contactsRouter);
-usersRouter.use("/:username/conversations", convRouter);
-usersRouter.use("/:username/messages", messageRouter);
+usersRouter.use("/:userId/friends", contactsRouter);
+usersRouter.use("/:userId/conversations", convRouter);
+usersRouter.use("/:userId/messages", messageRouter);
 
 export { usersRouter };
