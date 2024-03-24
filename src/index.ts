@@ -10,6 +10,10 @@ import { createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
+import cookie from "cookie"
+import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
+import { type } from "node:os";
+import { UserJWT } from "./helpers";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -56,8 +60,23 @@ export const io = new Server(server);
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  const cookie = socket.handshake.headers.cookie;
-  console.log("current cookies: ", cookie);
+  const cookief = socket.handshake.headers.cookie;
+
+  if(cookief) {
+    const parsedCookies = cookie.parse(cookief);
+    const token = parsedCookies.token;
+
+    if(!token) return;
+
+    const decodedToken = jwt.decode(token, {complete : true});
+    if (!decodedToken) return;
+    
+    const payload = decodedToken.payload as UserJWT;
+    console.log("live parsed cookie reaction: ", token);
+    console.log(payload, payload.user);
+    
+  }
+
   //console.log(socket.handshake.headers.cookie);
 
   // Listen for incoming chat messages
