@@ -1,22 +1,12 @@
-import axios from "axios";
-import React, {
-  useState,
-  useEffect,
-  createContext,
-  useContext,
-  useMemo,
-} from "react";
+import { axios } from "./axiosProvider";
+import React, { useState, useEffect, useMemo } from "react";
 import Cookies from "js-cookie";
+import { AuthContext } from "./authUtils";
 
-type ContextJWT = {
+export type ContextJWT = {
   token: string | null;
   setToken: (newToken: string) => void;
 };
-
-const AuthContext = createContext<ContextJWT>({
-  token: Cookies.get("token") || null,
-  setToken: () => {},
-});
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // State to hold the authentication token
@@ -31,7 +21,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-      Cookies.set("token", token);
+      setToken(token);
     } else {
       delete axios.defaults.headers.common["Authorization"];
       Cookies.remove("token");
@@ -51,10 +41,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  return useContext(AuthContext);
 };
 
 export default AuthProvider;
