@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../routes/protectedRoute";
 
 import Root from "../routes/root";
 import LoginPage from "../routes/auth/login";
+import RegisterPage from "../routes/auth/register";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -35,6 +36,10 @@ const Routes = () => {
     {
       path: "/login",
       element: <LoginPage />,
+    },
+    {
+      path: "/register",
+      element: <RegisterPage />,
     },
   ];
 
