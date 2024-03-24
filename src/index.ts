@@ -79,26 +79,11 @@ io.on('connection', (socket) => {
     user = payload.user;
   }
 
-  //console.log(socket.handshake.headers.cookie);
-
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
-    console.log('Received message:', data);
+    console.log(`Received message from ${user}:`, data);
 
-    
 
-    // Save the message to MongoDB
-    //const message = new Message({ user: data.user, text: data.message });
-    /*
-    message.save((err) => {
-      if (err) {
-        console.error('Error saving message to database:', err);
-      } else {
-        console.log('Message saved to the database');
-      }
-    });*/
-
-    // Broadcast the message to all connected clients
     io.emit('chat message', {user : user, message : data.message});
   });
 
