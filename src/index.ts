@@ -56,7 +56,9 @@ export const io = new Server(server);
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  console.log(socket.handshake.headers.cookie);
+  const cookie = socket.handshake.headers.cookie;
+  console.log("current cookies: ", cookie);
+  //console.log(socket.handshake.headers.cookie);
 
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
