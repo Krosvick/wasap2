@@ -1,15 +1,15 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import AddContactForm from "../components/addContact";
 
 export default function Root() {
   return (
-    <>
-      <div className="flex min-w-1/3 h-full bg-gray-300">
-        <h1>React Router Contacts</h1>
-        <div className="flex items-center"></div>
+    <main className="flex w-screen h-screen">
+      <div className="flex w-1/5 h-full bg-gray-300">
+        <AddContactForm />
       </div>
-      <div id="detail">
+      <div className="w-2/3">
         <Outlet />
       </div>
-    </>
+    </main>
   );
 }
