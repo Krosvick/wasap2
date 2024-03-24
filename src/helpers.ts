@@ -1,5 +1,4 @@
-import { Socket } from "socket.io";
-
+//This is for getting the User Payload from the JWT.
 interface UserJWT {
     user : string;
     iat : number;

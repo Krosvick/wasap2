@@ -11,8 +11,7 @@ import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
 import cookie from "cookie"
-import jwt, { Jwt, JwtPayload } from "jsonwebtoken";
-import { type } from "node:os";
+import jwt from "jsonwebtoken";
 import { UserJWT } from "./helpers";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
