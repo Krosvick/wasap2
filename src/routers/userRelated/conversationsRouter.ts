@@ -9,14 +9,19 @@ import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 
 export const convRouter = Router({ mergeParams: true });
 
-const findConversations = async (participantName : string = "") => {
-  console.log("participant: ", participantName);
+const findConversations = async (participantId: string = "") => {
+  console.log("participant: ", participantId);
   const conversations = await prisma.conversation.findMany({
     select: {
       id: true,
       participants: {
         select: {
           username: true,
+        },
+        where: {
+          id: {
+            not: participantId,
+          },
         },
       },
       messages: {
@@ -26,15 +31,15 @@ const findConversations = async (participantName : string = "") => {
           createdAt: true,
         },
         orderBy: {
-          createdAt: 'asc',
+          createdAt: "asc",
         },
       },
     },
-    where: participantName
+    where: participantId
       ? {
           participants: {
             some: {
-              username: participantName,
+              id: participantId,
             },
           },
         }
@@ -42,26 +47,24 @@ const findConversations = async (participantName : string = "") => {
   });
   //res.json(conversations);
   return conversations;
-}
+};
 
 convRouter.get(
   "/",
   authenticateJWTCookie,
   async (req: Request, res: Response) => {
-    console.log(req.params);
-    const username = req.query.username;
+    const userId = req.params.userId;
 
-    if(username) {
-      const conversations = await findConversations(String(username));
+    if (userId) {
+      const conversations = await findConversations(userId);
 
-      if(conversations.length > 0) {
+      if (conversations.length > 0) {
         res.json(conversations);
         return;
       }
 
-      res.json({message : `Conversations with ${username} not found.`});
-    }
-    else {
+      res.json({ message: `Conversations with ${userId} not found.` });
+    } else {
       const conversations = await findConversations();
       res.json(conversations);
     }
