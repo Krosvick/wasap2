@@ -56,11 +56,12 @@ apiRouter.use("/conversations", convRouter);
 const server = createServer(app);
 export const io = new Server(server);
 
-
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   const cookief = socket.handshake.headers.cookie;
+
   let user : string | null = null;
+  var sockets = [];
 
   if(cookief) {
     const parsedCookies = cookie.parse(cookief);

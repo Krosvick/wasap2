@@ -1,6 +1,6 @@
 //This is for getting the User Payload from the JWT.
 interface UserJWT {
-    user : string;
+    id : string;
     iat : number;
     exp : number;
 }
