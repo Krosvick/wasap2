@@ -58,7 +58,7 @@ io.on("connection", () => {
 });
 
 app.get("/socket", (req: Request, res: Response) => {
-  res.sendFile(VIEWS_DIR + "socket_test.html");
+  res.sendFile(VIEWS_DIR + "/socket_test.html");
 });
 
 server.listen(port, () => {
