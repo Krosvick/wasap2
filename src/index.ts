@@ -12,6 +12,7 @@ import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
 import { LOG_TYPES, debugLogs, getCookieFromSocket } from "./helpers";
 import prisma from "./db/prisma";
+import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -61,21 +62,43 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   const cookief = socket.handshake.headers.cookie;
 
-
-
-  // Listen for incoming chat messages
-  socket.on('chat message', (data) => {
-    let user = getCookieFromSocket(cookief);
-  
-    if(!user) {
+  //This should be the socket where the user enters conversation.
+  //Should receive the conversation id.
+  socket.on('enter-conversation', (data) => {
+    const convId = data.conversation;
+    const userId = getCookieFromSocket(cookief);
+    
+    if(!userId || !convId) {
       return;
     }
 
-    console.log(`Received message from ${user}:`, data);
+    //Make sure we joined the conversation.
+    socket.join(convId);
+
+    //Send the status to clients in the 'Whatsapp-like' thing.
+    socket.to(convId).emit("user-status", {
+      status : "connected",
+    })
+
+    storedUsers.push({id : socket.id, userId, convId});
+
+
+
+  })
+
+  // Listen for incoming chat messages
+  socket.on('chat message', (data) => {
+    let userId = getCookieFromSocket(cookief);
+  
+    if(!userId) {
+      return;
+    }
+
+    console.log(`Received message from ${userId}:`, data);
 
     prisma.user.findFirst({
       where: {
-        id: user
+        id: userId,
       },
       select: {
         username : true,
@@ -83,7 +106,7 @@ io.on('connection', (socket) => {
     }).then((user) => {
       io.emit('chat message', {user : user?.username, message : data.message});
 
-      debugLogs(LOG_TYPES.NONE, `User connected ${user?.username}`);
+      debugLogs(LOG_TYPES.NONE, `User connected:  ${user?.username}`);
     }).catch((err) => {
       console.log("error feo");
     });
@@ -97,12 +120,16 @@ io.on('connection', (socket) => {
   });
 });
 
-app.get("/socket", (req: Request, res: Response) => {
+app.get("/socket", authenticateJWTCookie, (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/socket_test.html");
 });
 
 app.get("/form", (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/login.html");
+});
+
+app.get("/conversation", authenticateJWTCookie, (req: Request, res: Response) => {
+  res.sendFile(VIEWS_DIR + "/conversation.html");
 });
 
 
