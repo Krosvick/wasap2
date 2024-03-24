@@ -4,17 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { validateRequestBody } from "zod-express-middleware";
 import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 import { removeFriendSchema, addFriendSchema } from "../../schemas/userSchema";
-import cookieParser from "cookie-parser";
 
 export const contactsRouter = Router({ mergeParams: true });
-
-contactsRouter.use(cookieParser());
 
 contactsRouter.get("/", async (req: Request, res: Response) => {
   const uName = req.params.username;
 
   if (!uName) {
-    res.send("Not valid user?");
+    res.send("User not specified.");
     return;
   }
 

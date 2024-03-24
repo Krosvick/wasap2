@@ -10,8 +10,6 @@ messageRouter.get("/", async (req: Request, res: Response) => {
   const limit = req.query["limit"] ? Number(req.query["limit"]) : DEFAULT_MESSAGE_LIMIT;
   const onlyUnread = req.query["unread"] ? Boolean(req.query["unread"]) : false;
 
-  console.log(limit, onlyUnread);
-
   const messages = await prisma.conversation.findMany({
     where: {
       participants: {

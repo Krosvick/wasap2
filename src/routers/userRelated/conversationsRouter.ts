@@ -9,64 +9,60 @@ import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 
 export const convRouter = Router({ mergeParams: true });
 
+const findConversations = async (participantName : string = "") => {
+  console.log("participant: ", participantName);
+  const conversations = await prisma.conversation.findMany({
+    select: {
+      id: true,
+      participants: {
+        select: {
+          username: true,
+        },
+      },
+      messages: {
+        select: {
+          content: true,
+          sender: { select: { username: true } },
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+    where: participantName
+      ? {
+          participants: {
+            some: {
+              username: participantName,
+            },
+          },
+        }
+      : undefined,
+  });
+  //res.json(conversations);
+  return conversations;
+}
+
 convRouter.get(
   "/",
   authenticateJWTCookie,
   async (req: Request, res: Response) => {
-    if (!req.params.username) {
-      const conversations = await prisma.conversation.findMany({
-        select: {
-          id: true,
-          participants: {
-            //we only care abt the username not the other weird stuff.
-            select: {
-              username: true,
-            },
-          },
-          messages: {
-            select: {
-              content: true,
-              //this may look better one-lined.
-              sender: { select: { username: true } },
-              createdAt: true,
-            },
-            orderBy: {
-              createdAt: "asc",
-            },
-          },
-        },
-      });
-      res.json(conversations);
-    } else {
-      const conversations = await prisma.conversation.findMany({
-        select: {
-          id: true,
-          participants: {
-            //we only care abt the username not the other weird stuff.
-            select: {
-              username: true,
-            },
-          },
-          messages: {
-            select: {
-              content: true,
-              //this may look better one-lined.
-              sender: { select: { username: true } },
-              createdAt: true,
-            },
-            orderBy: {
-              createdAt: "asc",
-            },
-          },
-        },
-        where: {
-          participants: {
-            some: {
-              username: req.params.username,
-            },
-          },
-        },
-      });
+    console.log(req.params);
+    const username = req.query.username;
+
+    if(username) {
+      const conversations = await findConversations(String(username));
+
+      if(conversations.length > 0) {
+        res.json(conversations);
+        return;
+      }
+
+      res.json({message : `Conversations with ${username} not found.`});
+    }
+    else {
+      const conversations = await findConversations();
       res.json(conversations);
     }
   },
