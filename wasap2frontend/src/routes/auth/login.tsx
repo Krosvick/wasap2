@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="flex flex-col items-center justify-center">
         <form
           onSubmit={handleSubmit((data) => mutateAsync(data))}
-          className="flex flex-col items-center justify-center"
+          className="flex flex-col items-center justify-center gap-3"
         >
           <Input
             {...register("username")}
@@ -56,6 +56,9 @@ export default function LoginPage() {
             isDisabled={!isDirty || !isValid}
           >
             Login
+          </Button>
+          <Button onClick={() => navigate("/register")} className="w-80">
+            Register
           </Button>
         </form>
       </div>
