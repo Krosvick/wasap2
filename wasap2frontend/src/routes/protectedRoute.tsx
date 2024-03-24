@@ -1,9 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../providers/authProvider";
+import { useAuth } from "../providers/authUtils";
 
 export const ProtectedRoute = () => {
   const { token } = useAuth();
-
   // Check if the user is authenticated
   if (!token) {
     // If not authenticated, redirect to the login page
