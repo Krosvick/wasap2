@@ -1,11 +1,11 @@
 import { Input, Button } from "@nextui-org/react";
-import axios from "axios";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userLoginSchema } from "../../../../src/schemas/userSchema";
 import { z } from "zod";
+import { login } from "../../services/authService";
 
-type UserLogin = z.infer<typeof userLoginSchema>;
+export type UserLogin = z.infer<typeof userLoginSchema>;
 
 export default function LoginPage() {
   const {
@@ -17,12 +17,12 @@ export default function LoginPage() {
   });
 
   const onSubmit: SubmitHandler<UserLogin> = async (data) => {
-    const response = await axios.post(
-      "http://localhost:3000/api/auth/login",
-      data,
-      { withCredentials: true },
-    );
-    console.log(response);
+    try {
+      const response = await login(data);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
