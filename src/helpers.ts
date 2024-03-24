@@ -6,12 +6,14 @@ enum LOG_TYPES {
     NONE = 0,
     ERROR = 1,
     WARNING = 2,
+    INFO = 3,
 }
 
 const MESSAGES = {
     [LOG_TYPES.NONE] : "",
     [LOG_TYPES.ERROR] : "[ERROR]",
-    [LOG_TYPES.WARNING] : "[WARNING]"
+    [LOG_TYPES.WARNING] : "[WARNING]",
+    [LOG_TYPES.INFO] : "[INFO]",
 }
 
 interface UserJWT {

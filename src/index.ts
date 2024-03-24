@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
 
   //This should be the socket where the user enters conversation.
   //Should receive the conversation id.
-  socket.on('enter-conversation', (data) => {
+  socket.on('enter-conversation', async (data) => {
     const convId = data.conversation;
     const userId = getCookieFromSocket(cookief);
     
@@ -82,9 +82,18 @@ io.on('connection', (socket) => {
 
     storedUsers.push({id : socket.id, userId, convId});
 
-
+    const chatUsers = await prisma.conversation.findFirst({
+      where: {
+        id: convId,
+      },
+      select : {
+        participants: true,
+      }
+    })
 
   })
+
+  //socket.on('send-msg')
 
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
