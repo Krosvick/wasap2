@@ -150,11 +150,13 @@ contactsRouter.post(
       })
       .then(async (user) => {
         //The user may delete friends so we need to preserve the conversation and load it.
+        //find a conversation of the user with the friend
         const lastConversation = await prisma.conversation.findFirst({
           where: {
             participants: {
+              //filter with userId and friendId
               some: {
-                id: { in: [userId, friendId.id] },
+                AND: [{ id: userId }, { id: friendId.id }],
               },
             },
             //HACK: Add this boolean because Prisma doesn't have any length based search.
