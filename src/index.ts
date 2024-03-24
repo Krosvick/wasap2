@@ -53,13 +53,44 @@ apiRouter.use("/conversations", convRouter);
 const server = createServer(app);
 export const io = new Server(server);
 
-io.on("connection", () => {
-  console.log("a user connected");
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+  console.log(socket.handshake.headers.cookie);
+
+  // Listen for incoming chat messages
+  socket.on('chat message', (data) => {
+    console.log('Received message:', data);
+
+    // Save the message to MongoDB
+    //const message = new Message({ user: data.user, text: data.message });
+    /*
+    message.save((err) => {
+      if (err) {
+        console.error('Error saving message to database:', err);
+      } else {
+        console.log('Message saved to the database');
+      }
+    });*/
+
+    // Broadcast the message to all connected clients
+    io.emit('chat message', data);
+  });
+
+  // Listen for user disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
 });
 
 app.get("/socket", (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/socket_test.html");
 });
+
+app.get("/form", (req: Request, res: Response) => {
+  res.sendFile(VIEWS_DIR + "/login.html");
+});
+
 
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
