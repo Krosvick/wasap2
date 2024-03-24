@@ -1,15 +1,18 @@
 import { Input, Button } from "@nextui-org/react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userLoginSchema } from "../../../../src/schemas/userSchema";
 import { z } from "zod";
-import { login } from "../../services/authService";
+import { useLogin } from "../../services/authService";
+import { useAuth } from "../../providers/authUtils";
 
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export type UserLogin = z.infer<typeof userLoginSchema>;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { setToken } = useAuth();
   const {
     register,
     handleSubmit,
@@ -18,23 +21,21 @@ export default function LoginPage() {
     resolver: zodResolver(userLoginSchema),
   });
 
-  const onSubmit: SubmitHandler<UserLogin> = async (data) => {
-    try {
-      const response = await login(data);
-      if (response.status === 200) {
-        return <Navigate to="/" />;
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { mutateAsync, isSuccess, data } = useLogin();
+
+  console.log(isSuccess);
+  if (isSuccess) {
+    if (data?.data?.token) setToken(data.data.token);
+    navigate("/", { replace: true });
+    return;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-screen">
       <h1 className="text-4xl font-bold pb-5">Login</h1>
       <div className="flex flex-col items-center justify-center">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit((data) => mutateAsync(data))}
           className="flex flex-col items-center justify-center"
         >
           <Input
