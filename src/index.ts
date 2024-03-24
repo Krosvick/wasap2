@@ -61,6 +61,7 @@ export const io = new Server(server);
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   const cookief = socket.handshake.headers.cookie;
+  let user : string | null = null;
 
   if(cookief) {
     const parsedCookies = cookie.parse(cookief);
@@ -75,6 +76,7 @@ io.on('connection', (socket) => {
     console.log("live parsed cookie reaction: ", token);
     console.log(payload, payload.user);
     
+    user = payload.user;
   }
 
   //console.log(socket.handshake.headers.cookie);
@@ -82,6 +84,8 @@ io.on('connection', (socket) => {
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
     console.log('Received message:', data);
+
+    
 
     // Save the message to MongoDB
     //const message = new Message({ user: data.user, text: data.message });
@@ -95,7 +99,7 @@ io.on('connection', (socket) => {
     });*/
 
     // Broadcast the message to all connected clients
-    io.emit('chat message', data);
+    io.emit('chat message', {user : user, message : data.message});
   });
 
   // Listen for user disconnection
