@@ -10,11 +10,8 @@ import { createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
-import cookie from "cookie"
-import jwt from "jsonwebtoken";
-import { UserJWT } from "./helpers";
+import { LOG_TYPES, debugLogs, getCookieFromSocket } from "./helpers";
 import prisma from "./db/prisma";
-import { boolean } from "zod";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -58,37 +55,25 @@ apiRouter.use("/conversations", convRouter);
 const server = createServer(app);
 export const io = new Server(server);
 
+var storedUsers = [];
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   const cookief = socket.handshake.headers.cookie;
 
-  let user : string = "";
-  var sockets = [];
 
-  if(cookief) {
-    const parsedCookies = cookie.parse(cookief);
-    const token = parsedCookies.token;
-
-    if(!token) return;
-
-    const decodedToken = jwt.decode(token, {complete : true});
-    if (!decodedToken) return;
-    
-    const payload = decodedToken.payload as UserJWT;
-    console.log("live parsed cookie reaction: ", token);
-    console.log(payload, payload.id);
-    
-    user = payload.id;
-  }
 
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
-    console.log(`Received message from ${user}:`, data);
-    if (!user) {
+    let user = getCookieFromSocket(cookief);
+  
+    if(!user) {
       return;
     }
-  
-    const userData = prisma.user.findFirst({
+
+    console.log(`Received message from ${user}:`, data);
+
+    prisma.user.findFirst({
       where: {
         id: user
       },
@@ -97,6 +82,8 @@ io.on('connection', (socket) => {
       }
     }).then((user) => {
       io.emit('chat message', {user : user?.username, message : data.message});
+
+      debugLogs(LOG_TYPES.NONE, `User connected ${user?.username}`);
     }).catch((err) => {
       console.log("error feo");
     });
