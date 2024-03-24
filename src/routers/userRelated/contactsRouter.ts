@@ -77,7 +77,8 @@ contactsRouter.post(
   validateRequestBody(addFriendSchema),
   authenticateJWTCookie,
   async (req, res) => {
-    const { userId, friendUsername } = req.body;
+    const userId = req.params.userId;
+    const { friendUsername } = req.body;
     const friendId = await prisma.user.findFirst({
       where: {
         username: friendUsername,

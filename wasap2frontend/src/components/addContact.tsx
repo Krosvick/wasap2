@@ -3,10 +3,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addFriendSchema } from "../../../src/schemas/userSchema";
 import { z } from "zod";
+import { useAddContact } from "../services/contactsService";
 
 export type AddContact = z.infer<typeof addFriendSchema>;
 
-export default function AddContactForm() {
+export interface AddContactFormProps {
+  userData: {
+    id: string;
+    username: string;
+    email: string;
+    userFriendsIds: string[];
+  };
+}
+
+export default function AddContactForm({ userData }: AddContactFormProps) {
   //simple input and button to add a contact by username
   const {
     register,
@@ -16,13 +26,20 @@ export default function AddContactForm() {
     resolver: zodResolver(addFriendSchema),
   });
 
+  const { mutateAsync, isSuccess, data } = useAddContact();
+
+  if (isSuccess) {
+    console.log(data);
+  }
+
   return (
     <div className="flex">
       <form
-        onSubmit={handleSubmit((data) => console.log(data))}
+        onSubmit={handleSubmit((data) => {
+          mutateAsync({ ...data, userId: userData.id });
+        })}
         className="flex gap-3 m-5"
       >
-        <input type="hidden" {...register("userId")} value="1" />
         <Input
           {...register("friendUsername")}
           placeholder="Username"

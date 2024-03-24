@@ -22,6 +22,5 @@ export const removeFriendSchema = z.object({
 });
 
 export const addFriendSchema = z.object({
-  userId: z.string(),
   friendUsername: z.string(),
 });
