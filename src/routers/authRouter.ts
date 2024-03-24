@@ -13,14 +13,14 @@ authRouter.use(cookieParser());
 authRouter.post(
   "/signup",
   validateRequestBody(userRegistrationSchema),
-  (req: Request, res: Response) => {
+  (req, res) => {
     const { username, email, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
     prisma.user
       .create({
         data: {
-          username,
-          email,
+          username: username.toLowerCase(),
+          email: email.toLowerCase(),
           password: hashedPassword,
           friendList: {
             create: {},
@@ -28,10 +28,12 @@ authRouter.post(
         },
       })
       .then((user) => {
-        res.json(user);
+        console.log(user);
+        res.sendStatus(StatusCodes.CREATED);
       })
       .catch((error) => {
-        res.json({ error: error.message });
+        console.log(error);
+        res.sendStatus(StatusCodes.BAD_REQUEST);
       });
   },
 );
