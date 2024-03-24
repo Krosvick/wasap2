@@ -4,11 +4,11 @@ import { StatusCodes } from "http-status-codes";
 
 const secret = process.env.JWT_SECRET;
 
-function generateAccessToken(username: string): string {
+function generateAccessToken(id: string): string {
   if (!secret) {
     throw new Error("JWT_SECRET is not defined in the environment");
   }
-  return jwt.sign({ user: username }, secret, { expiresIn: "1h" });
+  return jwt.sign({ id: id }, secret, { expiresIn: "1h" });
 }
 
 function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) {

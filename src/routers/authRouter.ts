@@ -60,7 +60,7 @@ authRouter.post("/login", validateRequestBody(userLoginSchema), (req, res) => {
         return;
       }
 
-      const token = generateAccessToken(user.username);
+      const token = generateAccessToken(user.id);
       console.log(token);
       res.cookie("token", token);
       res.json({ token });
