@@ -6,6 +6,7 @@ import { validateRequestBody } from "zod-express-middleware";
 import { userRegistrationSchema, userLoginSchema } from "../schemas/userSchema";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
+import { LOG_TYPES, debugLogs } from "../helpers";
 
 const authRouter = Router();
 authRouter.use(cookieParser());
@@ -40,6 +41,9 @@ authRouter.post(
 
 authRouter.post("/login", validateRequestBody(userLoginSchema), (req, res) => {
   const { username, email, password } = req.body;
+
+  debugLogs(LOG_TYPES.INFO, `Data received: ${username}, ${password}`);
+
   prisma.user
     .findFirst({
       where: {

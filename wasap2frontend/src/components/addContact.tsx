@@ -26,7 +26,7 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
     resolver: zodResolver(addFriendSchema),
   });
 
-  const { mutateAsync, isSuccess, data } = useAddContact();
+  const { mutateAsync, isSuccess, data, isError } = useAddContact();
 
   if (isSuccess) {
     console.log(data);
@@ -45,7 +45,7 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
         <Input
           {...register("friendUsername")}
           placeholder="Username"
-          errorMessage={errors.friendUsername?.message}
+          errorMessage={errors.friendUsername?.message || isError}
         />
         <Button
           type="submit"
@@ -56,6 +56,9 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
           Add Contact
         </Button>
       </form>
+      {isError && 
+        <p className="text-red-700 font-semibold">Contacto ya agregado, viva la republica popular China!!!!</p>
+      }
     </div>
   );
 }

@@ -146,7 +146,28 @@ contactsRouter.post(
         });
     }
     
-    //FIXME: The user can update this table every single time if adds a new friend.
+    //FIXME: The user can update this table every single time if adds the friend that already exists on friendlist.
+    const isValidFriendlist = !!await prisma.user.findFirst({
+      where: {
+        id: userId,
+        friendList: {
+          userFriends: {
+            some: {
+              id: friendId.id,
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+      }
+    })
+
+    if(isValidFriendlist) {
+      res.status(StatusCodes.NOT_ACCEPTABLE).json({error: "You can't add a friend who was already added."});
+      return;
+    }
+
     prisma.user
       .update({
         where: {

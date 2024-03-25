@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { Avatar, Chip } from "@nextui-org/react";
 
 export default function Contacts({ userId }: { userId: string }) {
-  const { data } = useGetConversations(userId);
-  console.log(data);
+  const { data, isSuccess } = useGetConversations(userId);
+  console.log(isSuccess);
   return (
     <div>
       <ul className="flex flex-col gap-3 h-full w-full">
