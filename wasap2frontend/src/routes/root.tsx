@@ -7,12 +7,12 @@ export default function Root() {
   const { data, isSuccess, isLoading } = useGetUserDetails();
   return (
     <main className="flex w-screen h-screen">
-      <div className="flex flex-col w-1/5 h-full bg-gray-300">
+      <div className="flex flex-col w-1/4 h-full bg-gray-300 p-5 bg-emerald-700 text-zinc-100">
         <AddContactForm userData={data} />
         {isLoading && <p>Loading...</p>}
         {isSuccess && <Contacts userId={data.id} />}
       </div>
-      <div className="w-2/3">
+      <div className="w-full">
         <Outlet />
       </div>
     </main>
