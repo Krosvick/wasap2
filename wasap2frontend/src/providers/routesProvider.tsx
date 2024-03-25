@@ -1,6 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { useAuth } from "./authUtils";
 import { ProtectedRoute } from "../routes/protectedRoute";
+import Chat from "../routes/chats";
+import { conversationLoader } from "../routes/chats";
 
 import Root from "../routes/root";
 import LoginPage from "../routes/auth/login";
@@ -26,6 +28,13 @@ const Routes = () => {
         {
           path: "/",
           element: <Root />,
+          children: [
+            {
+              path: "/:conversationId",
+              element: <Chat />,
+              loader: conversationLoader,
+            },
+          ],
         },
       ],
     },
