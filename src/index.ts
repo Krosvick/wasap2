@@ -91,6 +91,7 @@ io.on('connection', (socket) => {
       }
     })
 
+    debugLogs(LOG_TYPES.WARNING, "Actual users: ", chatUsers);
   })
 
   //socket.on('send-msg')

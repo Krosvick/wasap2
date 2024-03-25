@@ -8,23 +8,37 @@ import { removeFriendSchema, addFriendSchema } from "../../schemas/userSchema";
 export const contactsRouter = Router({ mergeParams: true });
 
 contactsRouter.get("/", async (req: Request, res: Response) => {
-  const uName = req.params.username;
+  const uId = req.params.userId;
+  console.log(req.params);
 
-  if (!uName) {
+  if (!uId) {
     res.send("User not specified.");
     return;
   }
 
-  const userObj = await prisma.user.findUnique({ where: { username: uName } });
+  const fList = await prisma.friendlist.findFirst({
+    where: {
+      owner: {
+        id: uId,
+      }
+    },
+    select: {
+      userFriends: {
+        select: {
+          id: true,
+          username : true,
+          email: true,
+        }
+      }
+    }
+  });
 
-  if (userObj === null) {
+  if (!fList) {
     res.status(StatusCodes.NOT_FOUND).send("User not found!");
     return;
   }
 
-  const friends = userObj.friendListIds;
-
-  res.json(friends);
+  res.json(fList);
 });
 
 contactsRouter.post(
@@ -99,6 +113,7 @@ contactsRouter.post(
         userId: userId,
       },
     });
+
     if (!userFriendList) {
       //create a friendlist for the user if it doesn't exist
       prisma.friendlist
@@ -130,7 +145,8 @@ contactsRouter.post(
             });
         });
     }
-
+    
+    //FIXME: The user can update this table every single time if adds a new friend.
     prisma.user
       .update({
         where: {
