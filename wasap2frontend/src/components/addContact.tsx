@@ -33,22 +33,23 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col justify-center items-start h-fit my-2">
+      <h1 className="text-xl font-bold m-1">WASAP2</h1>
+      <h2 className="text-xl font-bold">Añadir contacto</h2>
       <form
         onSubmit={handleSubmit((data) => {
           mutateAsync({ ...data, userId: userData.id });
         })}
-        className="flex gap-3 m-5"
+        className="flex gap-3"
       >
         <Input
           {...register("friendUsername")}
           placeholder="Username"
-          className="w-2/3"
           errorMessage={errors.friendUsername?.message}
         />
         <Button
           type="submit"
-          className="w-1/3"
+          className="p-5"
           isDisabled={!isDirty || !isValid}
           color="secondary"
         >

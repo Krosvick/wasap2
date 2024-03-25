@@ -23,6 +23,7 @@ const conversationSchema = z.object({
   ),
   messages: z.array(
     z.object({
+      id: z.string(),
       content: z.string(),
       sender: z.object({
         username: z.string(),
@@ -32,7 +33,7 @@ const conversationSchema = z.object({
   ),
 });
 
-type Conversation = z.infer<typeof conversationSchema>;
+export type Conversation = z.infer<typeof conversationSchema>;
 
 const getConversations = async (userId: string) => {
   const contactsUrl = getApiUrl("/users/" + userId + "/conversations");
@@ -44,6 +45,30 @@ export const useGetConversations = (userId: string) => {
   return useQuery({
     queryKey: ["conversations"],
     queryFn: () => getConversations(userId),
+  });
+};
+
+export const getConversationMessages = async (
+  userId: string,
+  conversationId: string,
+) => {
+  if (!conversationId || !userId) {
+    return;
+  }
+  const conversationUrl = getApiUrl(
+    "/users/" + userId + "/conversations/" + conversationId,
+  );
+  const response = await axios.get<Conversation>(conversationUrl);
+  return response.data;
+};
+
+export const useGetConversationMessages = (
+  userId: string,
+  conversationId: string,
+) => {
+  return useQuery({
+    queryKey: ["conversation"],
+    queryFn: () => getConversationMessages(userId, conversationId),
   });
 };
 
