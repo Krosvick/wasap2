@@ -4,6 +4,7 @@ import { ContextJWT } from "./authProvider";
 
 export const AuthContext = createContext<ContextJWT>({
   token: Cookies.get("token") || undefined,
+  userId: undefined,
   setToken: () => {},
 });
 

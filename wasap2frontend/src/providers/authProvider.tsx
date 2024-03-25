@@ -7,6 +7,7 @@ import { UserJWT } from "../services/userService";
 
 export type ContextJWT = {
   token: string | undefined;
+  userId: string | undefined;
   setToken: (newToken: string) => void;
 };
 
@@ -14,6 +15,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // State to hold the authentication token
   //get token from cookie
   const [token, setToken_] = useState<string | undefined>(Cookies.get("token"));
+  const [userId, setUserId] = useState<string | undefined>();
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
   // Function to set the authentication token
@@ -25,6 +27,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       const decodedToken = jwtDecode(token);
       const payload = decodedToken as UserJWT;
+      const userId = payload.id;
+      setUserId(userId);
       const exp = payload.exp;
       const isExpired = Date.now() >= exp * 999;
       setIsExpired(isExpired);
@@ -35,6 +39,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       delete axios.defaults.headers.common["Authorization"];
       Cookies.remove("token");
+      setUserId(undefined);
     }
   }, [token]);
 
@@ -42,6 +47,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const contextValue = useMemo(
     () => ({
       token,
+      userId,
       setToken,
     }),
     [token],
