@@ -86,6 +86,7 @@ convRouter.get("/:convId", async (req: Request, res: Response) => {
       },
       messages: {
         select: {
+          id: true,
           content: true,
           sender: { select: { username: true } },
           createdAt: true,
