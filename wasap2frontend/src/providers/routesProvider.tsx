@@ -34,10 +34,8 @@ const Routes = () => {
               path: "/contact/:conversationId",
               element: <Chat />,
               loader: conversationLoader,
-              children: [
-                { index: true, element: <Index />}
-              ]
             },
+            { index: true, element: <Index />}
           ],
         },
       ],
