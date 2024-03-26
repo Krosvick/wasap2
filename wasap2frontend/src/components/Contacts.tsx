@@ -11,7 +11,7 @@ export default function Contacts({ userId }: { userId: string }) {
         {data?.map((conversation) => (
           <li className="w-full" key={conversation.id}>
             {conversation.participants.map((participant) => (
-              <Link to={conversation.id} key={participant.username}>
+              <Link to={"contact/" + conversation.id} key={participant.username}>
                 <Chip
                   variant="solid"
                   radius="sm"

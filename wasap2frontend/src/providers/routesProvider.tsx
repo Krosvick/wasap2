@@ -7,6 +7,7 @@ import { conversationLoader } from "../routes/chats";
 import Root from "../routes/root";
 import LoginPage from "../routes/auth/login";
 import RegisterPage from "../routes/auth/register";
+import Index from "../routes/contactsIndex";
 
 const Routes = () => {
   const { token } = useAuth();
@@ -30,9 +31,12 @@ const Routes = () => {
           element: <Root />,
           children: [
             {
-              path: "/:conversationId",
+              path: "/contact/:conversationId",
               element: <Chat />,
               loader: conversationLoader,
+              children: [
+                { index: true, element: <Index />}
+              ]
             },
           ],
         },

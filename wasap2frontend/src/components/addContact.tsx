@@ -35,12 +35,12 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
   return (
     <div className="flex flex-col justify-center items-start h-fit my-2">
       <h1 className="text-xl font-bold m-1">WASAP2</h1>
-      <h2 className="text-xl font-bold">Añadir contacto</h2>
+      <h2 className="text-xl font-bold pb-1">Añadir contacto</h2>
       <form
         onSubmit={handleSubmit((data) => {
           mutateAsync({ ...data, userId: userData.id });
         })}
-        className="flex gap-3"
+        className="flex gap-3 w-full"
       >
         <Input
           {...register("friendUsername")}
