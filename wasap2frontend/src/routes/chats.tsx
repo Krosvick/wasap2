@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { UserJWT } from "../services/userService";
 import { Conversation } from "../services/contactsService";
 import { Image } from "@nextui-org/react";
+import SendMessage from "../components/sendMessage";
 
 export async function conversationLoader({
   params,
@@ -44,6 +45,7 @@ export default function Chat() {
           </li>
         ))}
       </ul>
+      <SendMessage  conversationId={conversation.id}/>
     </div>
   );
 }
