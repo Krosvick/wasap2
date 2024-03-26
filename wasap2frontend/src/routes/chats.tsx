@@ -11,7 +11,7 @@ export async function conversationLoader({
 }: {
   params: { conversationId: string };
 }) {
-  const { conversationId } = params;
+  const conversationId = params.conversationId;
   if (!Cookies.get("token")) {
     return { conversation: null };
   }
