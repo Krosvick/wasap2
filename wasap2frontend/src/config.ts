@@ -1,3 +1,4 @@
-const API_URL = process.env.DEVELOPMENT_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
+const API_PATH = `${API_URL}/api`;
 
-export const getApiUrl = (path: string) => `${API_URL}${path}`;
+export const getApiUrl = (path: string) => `${API_PATH}${path}`;
