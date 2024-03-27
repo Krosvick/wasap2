@@ -11,29 +11,81 @@
       <input id="messageInput" autocomplete="off" />
       <button>Send</button>
     </form>
+    <p id="convChange"></p>
+
   </div>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
     const socket = io();
 
+    //OBSERVABLE OBJECT.
+    var data = {
+        convId : 1234,
+    }
+
+    function handleChangeText(value) {
+        let pChange = document.getElementById("convChange");
+        pChange.innerText = `Room ID changed to: ${value}`;
+    }
+
+    let handler = {
+        set(target, prop, value) {
+            console.log(`changed conversation ${prop} from ${target[prop]} to ${value}`);
+            handleChangeText(value);
+
+            socket.emit("enter-conversation", {conversation : value});
+            target[prop] = value;
+        },
+    }
+
+    var proxy = new Proxy(data, handler);
+
     // Handle incoming chat messages
+    // This is broadcasted to all clients, maybe?.
     socket.on('chat message', (data) => {
-      const messages = document.getElementById('messages');
-      const li = document.createElement('li');
-      li.textContent = `${data.user}: ${data.message}`;
-      messages.appendChild(li);
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        li.textContent = `${data.user}: ${data.message}`;
+        messages.appendChild(li);
     });
 
+    let messageForm = document.getElementById('messageForm');
+
+    const CHANGE_COMMAND = "changeroom";
+
+    function handleConvRooms(command) {
+        let split = command.trim().split(" ");
+
+        if (split.length < 2) {
+            return false;
+        }
+
+        let commandName = split[0].trim();
+
+        if(commandName !== CHANGE_COMMAND){
+            return false;
+        }
+
+        let roomID = split[1].trim();
+        proxy.convId = roomID;
+
+        return true;
+    }
+
     // Handle form submission
-    document.getElementById('messageForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('messageInput');
-      const message = input.value.trim();
-      if (message !== '') {
-        socket.emit('chat message', { message });
-        input.value = '';
-      }
+    messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        if (handleConvRooms(message) === true) {
+          return;
+        }
+
+        if (message !== '') {
+            socket.emit('chat message', { message });
+            input.value = '';
+        }
     });
   </script>
 </body>
