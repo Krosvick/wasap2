@@ -22,6 +22,12 @@ interface UserJWT {
     exp : number;
 }
 
+interface ISocketInfo {
+    id: string;
+    userId : string;
+    convId : string;
+}
+
 function excludeAttrByMany<T extends object>(obj: T[], key: keyof T): void {
     obj.forEach(data => delete data[key]);
 }
