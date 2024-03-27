@@ -14,6 +14,7 @@ import { LOG_TYPES, debugLogs, getCookieFromSocket} from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
 import { leaveRoom, ISocketInfo } from "./chat_helpers";
+import { StatusCodes } from "http-status-codes";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -111,8 +112,6 @@ io.on('connection', (socket) => {
 
     console.log(`Received message from ${userId}:`, data);
 
-    
-
     prisma.user.findFirst({
       where: {
         id: userId,
@@ -152,8 +151,41 @@ app.get("/form", (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/login.html");
 });
 
-app.get("/conversation", authenticateJWTCookie, (req: Request, res: Response) => {
-  res.sendFile(VIEWS_DIR + "/conversation.html");
+app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Request, res: Response) => {
+  const convId = req.params.convId;
+  //same as lua array thing.
+  const cookies = req.cookies;
+  const currentUserId = getCookieFromSocket(String(cookies));
+
+  //THIS SHOULDN'T BE POSSIBLE.
+  if(!currentUserId){
+    res.send(StatusCodes.UNAUTHORIZED).json({message : "You need to log in."});
+    return;
+  }
+  
+  //check prisma moment.
+  const isOnConversation = !!await prisma.conversation.findFirst({
+    where: {
+      id: convId,
+      participants: {
+        some: {
+          id: currentUserId,
+        }
+      }
+    },
+    select: {
+      messages: true,
+      participants: true,
+    }
+  })
+
+  if(!isOnConversation) {
+    res.send(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
+    return;
+  }
+
+  res.sendFile(VIEWS_DIR + "/socket_test.html");
+  //res.sendFile(VIEWS_DIR + "/conversation.html");
 });
 
 //display this url on the message.
