@@ -18,8 +18,11 @@ const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
 const app = express();
 
+const FRONTEND_PORT = process.env.FRONTEND_PORT
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  //vite port.
+  origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
@@ -31,8 +34,6 @@ app.use(express.urlencoded({ extended: true }));
 //This is only for testing the io external script.
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan("dev"));
-
-const port = process.env.PORT || 3000;
 
 app.get("/", (req: Request, res: Response) => {
   //json response explaining the different api routes
@@ -94,8 +95,6 @@ io.on('connection', (socket) => {
     debugLogs(LOG_TYPES.WARNING, "Actual users: ", chatUsers);
   })
 
-  //socket.on('send-msg')
-
   // Listen for incoming chat messages
   socket.on('chat message', (data) => {
     let userId = getCookieFromSocket(cookief);
@@ -142,7 +141,10 @@ app.get("/conversation", authenticateJWTCookie, (req: Request, res: Response) =>
   res.sendFile(VIEWS_DIR + "/conversation.html");
 });
 
+//display this url on the message.
+const DEVELOPMENT_URL = process.env.DEVELOPMENT_URL;
+const PORT = process.env.PORT || 3000;
 
-server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+server.listen(PORT, () => {
+  console.log(`Server is running at ${DEVELOPMENT_URL}:${PORT}`);
 });

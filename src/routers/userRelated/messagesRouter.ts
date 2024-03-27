@@ -6,9 +6,12 @@ export const messageRouter = Router({ mergeParams: true });
 //This may be on env.
 const DEFAULT_MESSAGE_LIMIT = 1000;
 
+const LIMIT = "limit";
+const UNREAD = "unread";
+
 messageRouter.get("/", async (req: Request, res: Response) => {
-  const limit = req.query["limit"] ? Number(req.query["limit"]) : DEFAULT_MESSAGE_LIMIT;
-  const onlyUnread = req.query["unread"] ? Boolean(req.query["unread"]) : false;
+  const limit = req.query[LIMIT] ? Number(req.query[LIMIT]) : DEFAULT_MESSAGE_LIMIT;
+  const onlyUnread = req.query[UNREAD] ? Boolean(req.query[UNREAD]) : false;
 
   const messages = await prisma.conversation.findMany({
     where: {
