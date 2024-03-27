@@ -22,12 +22,6 @@ interface UserJWT {
     exp : number;
 }
 
-interface ISocketInfo {
-    id: string;
-    userId : string;
-    convId : string;
-}
-
 function excludeAttrByMany<T extends object>(obj: T[], key: keyof T): void {
     obj.forEach(data => delete data[key]);
 }
@@ -66,4 +60,4 @@ function debugLogs(mode : LOG_TYPES, ...args : any[]) {
     console.log(MESSAGES[mode], ...args);
 }
 
-export {excludeAttrByOne, excludeAttrByMany, debugLogs, LOG_TYPES, getCookieFromSocket, UserJWT, ISocketInfo};
+export {excludeAttrByOne, excludeAttrByMany, debugLogs, LOG_TYPES, getCookieFromSocket, UserJWT};
