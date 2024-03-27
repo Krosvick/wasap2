@@ -10,7 +10,7 @@ import { createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
-import { LOG_TYPES, debugLogs, getCookieFromSocket } from "./helpers";
+import { LOG_TYPES, debugLogs, getCookieFromSocket, ISocketInfo} from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
 
@@ -57,7 +57,7 @@ apiRouter.use("/conversations", convRouter);
 const server = createServer(app);
 export const io = new Server(server);
 
-var storedUsers = [];
+let storedUsers : ISocketInfo[] = [];
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
@@ -83,6 +83,8 @@ io.on('connection', (socket) => {
 
     storedUsers.push({id : socket.id, userId, convId});
 
+    debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convId}`);
+    /*
     const chatUsers = await prisma.conversation.findFirst({
       where: {
         id: convId,
@@ -90,9 +92,9 @@ io.on('connection', (socket) => {
       select : {
         participants: true,
       }
-    })
+    })*/
 
-    debugLogs(LOG_TYPES.WARNING, "Actual users: ", chatUsers);
+    //debugLogs(LOG_TYPES.WARNING, "Actual users: ", chatUsers);
   })
 
   // Listen for incoming chat messages
@@ -105,15 +107,21 @@ io.on('connection', (socket) => {
 
     console.log(`Received message from ${userId}:`, data);
 
+    
+
     prisma.user.findFirst({
       where: {
         id: userId,
       },
       select: {
         username : true,
+        id : true,
       }
     }).then((user) => {
-      io.emit('chat message', {user : user?.username, message : data.message});
+      let convTarget = storedUsers.find(sender => sender.userId === user?.id)?.convId;
+
+      if (convTarget)
+        io.to(convTarget).emit('chat message', {user : user?.username, message : data.message});
 
       debugLogs(LOG_TYPES.NONE, `User connected:  ${user?.username}`);
     }).catch((err) => {
