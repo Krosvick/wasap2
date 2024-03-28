@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
   })
 
   // Listen for incoming chat messages
-  socket.on('send-message', (data) => {
+  socket.on('send-message', async (data) => {
     let userId = getCookieFromSocket(cookief);
   
     if(!userId) {
@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
 
     console.log(`Received message from ${userId}:`, data);
 
-    prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         id: userId,
       },
@@ -109,35 +109,41 @@ io.on('connection', (socket) => {
         username : true,
         id : true,
       }
-    }).then((user) => {
-      if (!user)
-        return;
-      let convTarget = storedUsers.find(sender => sender.userId === user.id)?.convId;
-
-      debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user.username}`);
-
-      if (convTarget){
-        io.to(convTarget).emit('send-message', {user : user.username, message : data.message});
-        debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`);
-
-        // callback ahh moment.
-        //THIS IS FOR ONLY THE CASE THE ROOM IS RANDOM!!!!!!
-        if(!isValidConversation(convTarget)) 
-          return;
-
-        debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user.username} Message: ${data.message}`);
-
-        saveMessage(convTarget, data.message, user.username)
-        .then((message) => {
-          console.log("Message saved!");
-        })
-        .catch((err) => {
-          debugLogs(LOG_TYPES.ERROR, err);
-        });
-      }
-    }).catch((err) => {
-      debugLogs(LOG_TYPES.ERROR, err);
     });
+    
+    if (!user) {
+      return;
+    }
+
+    let convTarget = storedUsers.find(sender => sender.userId === user.id)?.convId;
+
+    debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user.username}`);
+
+    if(!convTarget)
+      return;
+
+    //Send message anyways.
+    io.to(convTarget).emit('send-message', {user : user.username, message : data.message});
+
+    //LOG INFO ABOUT THE MESSAGE.
+    debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`);
+
+    let actualConv = await isValidConversation(convTarget);
+
+    if(!actualConv) {
+      debugLogs(LOG_TYPES.WARNING, `User ${user.username} is trying to send the ${data.message} message to DB in Room ${convTarget}`);
+      return;
+    }
+
+    debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user.username} Message: ${data.message}`);
+
+    await saveMessage(convTarget, data.message, user.username)
+      .then((message) => {
+        console.log("Message saved!");
+      })
+      .catch((err) => {
+        debugLogs(LOG_TYPES.ERROR, err);
+      });
   });
 
   // Listen for user disconnection
@@ -171,31 +177,15 @@ app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Reques
     res.status(StatusCodes.UNAUTHORIZED).json({message : "You need to log in."});
     return;
   }
-  
-  //check prisma moment.
-  /*
-  const isOnConversation = !!await prisma.conversation.findFirst({
-    where: {
-      id: convId,
-      participants: {
-        some: {
-          id: currentUserId,
-        }
-      }
-    },
-    select: {
-      messages: true,
-      participants: true,
-    }
-  })*/
 
-  if(!isValidConversation(convId, currentUserId)) {
+  const isValid = await isValidConversation(convId, currentUserId);
+
+  if(!isValid) {
     res.status(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
     return;
   }
 
   res.sendFile(VIEWS_DIR + "/conversation_live.html");
-  //res.sendFile(VIEWS_DIR + "/conversation.html");
 });
 
 //display this url on the message.
