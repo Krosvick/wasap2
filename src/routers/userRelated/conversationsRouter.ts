@@ -3,15 +3,12 @@ import prisma from "../../db/prisma";
 import { StatusCodes } from "http-status-codes";
 import { validateRequest } from "zod-express-middleware";
 import { sendMessageSchema } from "../../schemas/messagesSchema";
-
-import { io } from "../..";
 import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 import { saveMessage } from "../../chat_helpers";
 
 export const convRouter = Router({ mergeParams: true });
 
 const findConversations = async (participantId: string = "") => {
-  console.log("participant: ", participantId);
   const conversations = await prisma.conversation.findMany({
     select: {
       id: true,
