@@ -26,10 +26,24 @@
       const pathname = url.pathname; 
       const paths = pathname.split("/"); 
       return paths.pop() || paths.pop();
-    }    
+    }
 
-    fetch(`http://localhost:3000/api/conversations/${getLastPath(window.location.href)}`, {method: 'GET'}).
-      then(resp => console.log(res.json()));
+    const convId = getLastPath(window.location.href);
+    const BASE_URL = window.location.origin;
+
+    const OPTIONS = {
+      method: "GET",
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      mode: "no-cors",
+    }
+
+    fetch(`${BASE_URL}/api/conversations/${convId}`, OPTIONS).
+      then(resp => resp.json())
+      .then(data => {
+        console.log(data);
+      });
 
     // Handle incoming chat messages
     // This is broadcasted to all clients, maybe?.
@@ -45,9 +59,6 @@
         e.preventDefault();
         const input = document.getElementById('messageInput');
         const message = input.value.trim();
-        if (handleConvRooms(message) === true) {
-          return;
-        }
 
         if (message !== '') {
             socket.emit('chat message', { message });
@@ -55,7 +66,7 @@
         }
     });
 
-    //socket.emit("enter-conversation", {conversation : 1234});
+    socket.emit("enter-conversation", {conversation : convId});
   </script>
 </body>
 </html>

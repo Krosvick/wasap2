@@ -89,17 +89,6 @@ io.on('connection', (socket) => {
     storedUsers.push({id : socket.id, userId, convId});
 
     debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convId}`);
-    /*
-    const chatUsers = await prisma.conversation.findFirst({
-      where: {
-        id: convId,
-      },
-      select : {
-        participants: true,
-      }
-    })*/
-
-    //debugLogs(LOG_TYPES.WARNING, "Actual users: ", chatUsers);
   })
 
   // Listen for incoming chat messages
