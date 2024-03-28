@@ -58,7 +58,7 @@
 
     // Handle incoming chat messages
     // This is broadcasted to all clients, maybe?.
-    socket.on('chat message', (data) => {
+    socket.on('send-message', (data) => {
         const messages = document.getElementById('messages');
         const li = document.createElement('li');
         li.textContent = `${data.user}: ${data.message}`;
@@ -72,7 +72,7 @@
         const message = input.value.trim();
 
         if (message !== '') {
-            socket.emit('chat message', { message });
+            socket.emit('send-message', { message });
             input.value = '';
         }
     });

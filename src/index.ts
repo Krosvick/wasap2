@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
   })
 
   // Listen for incoming chat messages
-  socket.on('chat message', (data) => {
+  socket.on('send-message', (data) => {
     let userId = getCookieFromSocket(cookief);
   
     if(!userId) {
@@ -115,7 +115,7 @@ io.on('connection', (socket) => {
       debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user?.username}`);
 
       if (convTarget){
-        io.to(convTarget).emit('chat message', {user : user?.username, message : data.message});
+        io.to(convTarget).emit('send-message', {user : user?.username, message : data.message});
         debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user?.username} Message: ${data.message}`);
 
         // callback ahh moment.
@@ -147,7 +147,7 @@ io.on('connection', (socket) => {
       console.log("error feo");
     });
 
-    //io.emit('chat message', {user : userData?.username, message : data.message});
+    //io.emit('send-message', {user : userData?.username, message : data.message});
   });
 
   // Listen for user disconnection
