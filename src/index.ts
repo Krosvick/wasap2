@@ -183,6 +183,7 @@ app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Reques
   }
   
   //check prisma moment.
+  /*
   const isOnConversation = !!await prisma.conversation.findFirst({
     where: {
       id: convId,
@@ -196,9 +197,9 @@ app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Reques
       messages: true,
       participants: true,
     }
-  })
+  })*/
 
-  if(!isOnConversation) {
+  if(!isValidConversation(convId, currentUserId)) {
     res.status(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
     return;
   }
