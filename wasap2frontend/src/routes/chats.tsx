@@ -6,6 +6,7 @@ import { UserJWT } from "../services/userService";
 import { Conversation } from "../services/contactsService";
 import { Image } from "@nextui-org/react";
 import SendMessage from "../components/sendMessage";
+import socket from "../providers/socketioProvider";
 
 export async function conversationLoader({
   params,
@@ -23,11 +24,15 @@ export async function conversationLoader({
   return { conversation };
 }
 export default function Chat() {
-  const { conversation } = useLoaderData() as { conversation: Conversation };
+  const data = useLoaderData() as { conversation: Conversation };
+  if (!data.conversation) {
+    return <div>Not authorized</div>;
+  }
+  socket.emit("enter-conversation", data);
   return (
     <div className="bg-green-500 h-screen w-full">
       <div className="flex w-full justify-between">
-        <h1>Chat {conversation.id}</h1>
+        <h1>Chat {data.conversation.id}</h1>
         <Image
           src="https://raw.githubusercontent.com/cirosantilli/china-dictatorship-media/master/Xi_Jinping_The_Governance_of_China_photo.jpg"
           alt="chat"
@@ -37,7 +42,7 @@ export default function Chat() {
         />
       </div>
       <ul>
-        {conversation.messages.map((message) => (
+        {data.conversation.messages.map((message) => (
           <li key={message.id} className="bg-gray-400 p-10">
             {message.content}
             <p>Sender: {message.sender.username}</p>
@@ -45,7 +50,7 @@ export default function Chat() {
           </li>
         ))}
       </ul>
-      <SendMessage  conversationId={conversation.id}/>
+      <SendMessage />
     </div>
   );
 }

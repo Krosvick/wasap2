@@ -3,13 +3,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sendMessageSchema } from "../../../src/schemas/messagesSchema";
 import { z } from "zod";
-import { useAddContact } from "../services/contactsService";
+import { useSendMessage } from "../services/messageService";
 
 export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 
-
 //TODO
-export default function SendMessage({ conversationId }: { conversationId: string }) {
+export default function SendMessage() {
   //simple input and button to add a contact by username
   const {
     register,
@@ -19,7 +18,7 @@ export default function SendMessage({ conversationId }: { conversationId: string
     resolver: zodResolver(sendMessageSchema.body),
   });
 
-  const { mutateAsync, isSuccess, data, isError } = useAddContact();
+  const { mutateAsync, isSuccess, data, isError } = useSendMessage();
 
   if (isSuccess) {
     console.log(data);
@@ -29,14 +28,14 @@ export default function SendMessage({ conversationId }: { conversationId: string
     <div className="flex flex-col justify-center items-start h-fit my-2">
       <form
         onSubmit={handleSubmit((data) => {
-          mutateAsync({ ...data, userId: userData.id });
+          mutateAsync({ ...data });
         })}
         className="flex gap-3 w-full"
       >
         <Input
           {...register("message")}
           placeholder="Mensaje"
-          errorMessage={errors.friendUsername?.message || isError}
+          errorMessage={errors.message?.message || isError}
         />
         <Button
           type="submit"
@@ -47,10 +46,9 @@ export default function SendMessage({ conversationId }: { conversationId: string
           Send
         </Button>
       </form>
-      {isError && 
+      {isError && (
         <p className="text-red-700 font-semibold">Error con el mensaje</p>
-      }
+      )}
     </div>
   );
 }
-
