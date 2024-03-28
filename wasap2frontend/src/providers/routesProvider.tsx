@@ -35,7 +35,7 @@ const Routes = () => {
               element: <Chat />,
               loader: conversationLoader,
             },
-            { index: true, element: <Index />}
+            { index: true, element: <Index /> },
           ],
         },
       ],
