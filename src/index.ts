@@ -122,6 +122,26 @@ io.on('connection', (socket) => {
         //THIS IS FOR ONLY THE CASE THE ROOM IS RANDOM!!!!!!
         if(!isValidConversation(convTarget)) 
           return;
+
+        debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user?.username} Message: ${data.message}`);
+
+        prisma.message.create({
+          data: {
+            content: data.message,
+            sender: {
+              connect: {
+                username: user?.username,
+              },
+            },
+            conversation: {
+              connect: {
+                id: convTarget,
+              },
+            },
+          },
+        }).then((message) => {
+          console.log("Message saved!");
+        });
       }
     }).catch((err) => {
       console.log("error feo");
