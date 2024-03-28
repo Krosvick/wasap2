@@ -30,9 +30,14 @@ export default function Chat() {
   }
   socket.emit("enter-conversation", data);
   return (
-    <div className="bg-green-500 h-screen w-full">
+    <div className="bg-green-500 h-full w-full max-h-screen flex flex-col">
       <div className="flex w-full justify-between">
-        <h1>Chat {data.conversation.id}</h1>
+        <h1>
+          Chat{" "}
+          {data.conversation.participants.map((participant) => (
+            <span>{participant.username} </span>
+          ))}
+        </h1>
         <Image
           src="https://raw.githubusercontent.com/cirosantilli/china-dictatorship-media/master/Xi_Jinping_The_Governance_of_China_photo.jpg"
           alt="chat"
@@ -41,16 +46,30 @@ export default function Chat() {
           radius="none"
         />
       </div>
-      <ul>
-        {data.conversation.messages.map((message) => (
-          <li key={message.id} className="bg-gray-400 p-10">
-            {message.content}
-            <p>Sender: {message.sender.username}</p>
-            <p>Time: {message.createdAt}</p>
-          </li>
-        ))}
-      </ul>
-      <SendMessage />
+      <div className="h-full overflow-auto flex flex-col-reverse">
+        <ul className="flex flex-col gap-3">
+          {data.conversation.messages.map((message) => (
+            <li key={message.id} className="bg-gray-400 p-10">
+              <div className="flex justify-between mb-5">
+                <p className="text-xl font-bold">{message.sender.username}</p>
+                <p>
+                  {new Date(message.createdAt).toLocaleString([], {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              {message.content}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex-shrink-0">
+        <SendMessage />
+      </div>
     </div>
   );
 }
