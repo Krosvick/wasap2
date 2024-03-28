@@ -26,4 +26,22 @@ const isValidConversation = async (convId : string, participantId? : string | un
     });
 }
 
-export {leaveRoom, ISocketInfo, isValidConversation}
+const saveMessage = async (convId : string, content : string, username : string) => {
+    return prisma.message.create({
+        data: {
+          content: content,
+          sender: {
+            connect: {
+              username: username,
+            },
+          },
+          conversation: {
+            connect: {
+              id: convId,
+            },
+          },
+        },
+    });
+} 
+
+export {leaveRoom, ISocketInfo, isValidConversation, saveMessage}

@@ -6,6 +6,7 @@ import { sendMessageSchema } from "../../schemas/messagesSchema";
 
 import { io } from "../..";
 import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
+import { saveMessage } from "../../chat_helpers";
 
 export const convRouter = Router({ mergeParams: true });
 
@@ -132,23 +133,9 @@ convRouter.post(
       return;
     }
     //create the message
-    await prisma.message.create({
-      data: {
-        content: message,
-        sender: {
-          connect: {
-            username: sender,
-          },
-        },
-        conversation: {
-          connect: {
-            id: convId,
-          },
-        },
-      },
-    });
+    await saveMessage(convId, message, sender);
     //emit the message
-    io.to(convId).emit("message", { sender, message });
+    //io.to(convId).emit("message", { sender, message });
 
     res.json({ message: "Message sent" });
   },

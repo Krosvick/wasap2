@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken} from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
-import { leaveRoom, ISocketInfo, isValidConversation } from "./chat_helpers";
+import { leaveRoom, ISocketInfo, isValidConversation, saveMessage } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
@@ -110,44 +110,34 @@ io.on('connection', (socket) => {
         id : true,
       }
     }).then((user) => {
-      let convTarget = storedUsers.find(sender => sender.userId === user?.id)?.convId;
+      if (!user)
+        return;
+      let convTarget = storedUsers.find(sender => sender.userId === user.id)?.convId;
 
-      debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user?.username}`);
+      debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user.username}`);
 
       if (convTarget){
-        io.to(convTarget).emit('send-message', {user : user?.username, message : data.message});
-        debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user?.username} Message: ${data.message}`);
+        io.to(convTarget).emit('send-message', {user : user.username, message : data.message});
+        debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`);
 
         // callback ahh moment.
         //THIS IS FOR ONLY THE CASE THE ROOM IS RANDOM!!!!!!
         if(!isValidConversation(convTarget)) 
           return;
 
-        debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user?.username} Message: ${data.message}`);
+        debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user.username} Message: ${data.message}`);
 
-        prisma.message.create({
-          data: {
-            content: data.message,
-            sender: {
-              connect: {
-                username: user?.username,
-              },
-            },
-            conversation: {
-              connect: {
-                id: convTarget,
-              },
-            },
-          },
-        }).then((message) => {
+        saveMessage(convTarget, data.message, user.username)
+        .then((message) => {
           console.log("Message saved!");
+        })
+        .catch((err) => {
+          debugLogs(LOG_TYPES.ERROR, err);
         });
       }
     }).catch((err) => {
-      console.log("error feo");
+      debugLogs(LOG_TYPES.ERROR, err);
     });
-
-    //io.emit('send-message', {user : userData?.username, message : data.message});
   });
 
   // Listen for user disconnection
