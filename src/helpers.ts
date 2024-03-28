@@ -30,6 +30,16 @@ function excludeAttrByOne(obj : object, keyToDelete : string) {
     return Object.fromEntries(Object.entries(obj).filter(([key]) => key !== keyToDelete));
 }
 
+function getToken(tokenCookie : string) : string | undefined {
+    const decodedToken = jwt.decode(tokenCookie, {complete : true});
+
+    if (!decodedToken) 
+        return;
+
+    const payload = decodedToken.payload as UserJWT;
+    return payload.id;
+}
+
 function getCookieFromSocket(cookieTarget : string = "") : string | undefined {
     //Imagine providing no cookies.
     if(cookieTarget === "") 
@@ -41,13 +51,7 @@ function getCookieFromSocket(cookieTarget : string = "") : string | undefined {
     if(!token) 
         return;
 
-    const decodedToken = jwt.decode(token, {complete : true});
-
-    if (!decodedToken) 
-        return;
-    
-    const payload = decodedToken.payload as UserJWT;
-    return payload.id;
+    return getToken(token);
 };
 
 //very basic way to log things.

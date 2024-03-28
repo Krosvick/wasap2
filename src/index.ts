@@ -155,11 +155,13 @@ app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Reques
   const convId = req.params.convId;
   //same as lua array thing.
   const cookies = req.cookies;
-  const currentUserId = getCookieFromSocket(String(cookies));
+  const currentUserId = getCookieFromSocket(cookies.token as string);
+  
+  console.log(cookies.token as string);
 
   //THIS SHOULDN'T BE POSSIBLE.
   if(!currentUserId){
-    res.send(StatusCodes.UNAUTHORIZED).json({message : "You need to log in."});
+    res.status(StatusCodes.UNAUTHORIZED).json({message : "You need to log in."});
     return;
   }
   
@@ -180,11 +182,11 @@ app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Reques
   })
 
   if(!isOnConversation) {
-    res.send(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
+    res.status(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
     return;
   }
 
-  res.sendFile(VIEWS_DIR + "/socket_test.html");
+  res.sendFile(VIEWS_DIR + "/conversation_live.html");
   //res.sendFile(VIEWS_DIR + "/conversation.html");
 });
 
