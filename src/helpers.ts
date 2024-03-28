@@ -64,4 +64,4 @@ function debugLogs(mode : LOG_TYPES, ...args : any[]) {
     console.log(MESSAGES[mode], ...args);
 }
 
-export {excludeAttrByOne, excludeAttrByMany, debugLogs, LOG_TYPES, getCookieFromSocket, UserJWT};
+export {excludeAttrByOne, excludeAttrByMany, debugLogs, LOG_TYPES, getCookieFromSocket, UserJWT, getToken};

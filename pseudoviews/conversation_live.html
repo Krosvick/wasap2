@@ -6,7 +6,8 @@
 <body>
   <h1>UNAP Chat</h1>
   <div id="chat">
-    <ul id="messages"></ul>
+    <ul id="messages" style="width: 500px; height: 250px; overflow-y: auto;"></ul>
+  
     <form id="messageForm">
       <input id="messageInput" autocomplete="off" />
       <button>Send</button>
@@ -20,27 +21,15 @@
   <script>
     const socket = io();
 
-    //OBSERVABLE OBJECT.
-    var data = {
-        convId : 1234,
-    }
+    const getLastPath = (url) => {
+      url = new URL(url);
+      const pathname = url.pathname; 
+      const paths = pathname.split("/"); 
+      return paths.pop() || paths.pop();
+    }    
 
-    function handleChangeText(value) {
-        let pChange = document.getElementById("convChange");
-        pChange.innerText = `Room ID changed to: ${value}`;
-    }
-
-    let handler = {
-        set(target, prop, value) {
-            console.log(`changed conversation ${prop} from ${target[prop]} to ${value}`);
-            handleChangeText(value);
-
-            socket.emit("enter-conversation", {conversation : value});
-            target[prop] = value;
-        },
-    }
-
-    var proxy = new Proxy(data, handler);
+    fetch(`http://localhost:3000/api/conversations/${getLastPath(window.location.href)}`, {method: 'GET'}).
+      then(resp => console.log(res.json()));
 
     // Handle incoming chat messages
     // This is broadcasted to all clients, maybe?.
@@ -50,29 +39,6 @@
         li.textContent = `${data.user}: ${data.message}`;
         messages.appendChild(li);
     });
-
-    let messageForm = document.getElementById('messageForm');
-
-    const CHANGE_COMMAND = "changeroom";
-
-    function handleConvRooms(command) {
-        let split = command.trim().split(" ");
-
-        if (split.length < 2) {
-            return false;
-        }
-
-        let commandName = split[0].trim();
-
-        if(commandName !== CHANGE_COMMAND){
-            return false;
-        }
-
-        let roomID = split[1].trim();
-        proxy.convId = roomID;
-
-        return true;
-    }
 
     // Handle form submission
     messageForm.addEventListener('submit', (e) => {
@@ -89,7 +55,7 @@
         }
     });
 
-    socket.emit("enter-conversation", {conversation : 1234});
+    //socket.emit("enter-conversation", {conversation : 1234});
   </script>
 </body>
 </html>

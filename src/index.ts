@@ -6,11 +6,11 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 import { Server } from "socket.io";
-import { createServer } from "node:http";
+import { STATUS_CODES, createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
-import { LOG_TYPES, debugLogs, getCookieFromSocket} from "./helpers";
+import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken} from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
 import { leaveRoom, ISocketInfo } from "./chat_helpers";
@@ -154,10 +154,13 @@ app.get("/form", (req: Request, res: Response) => {
 app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Request, res: Response) => {
   const convId = req.params.convId;
   //same as lua array thing.
-  const cookies = req.cookies;
-  const currentUserId = getCookieFromSocket(cookies.token as string);
-  
-  console.log(cookies.token as string);
+  const token = req.cookies.token;
+
+  if (!token) {
+    res.status(StatusCodes.UNAUTHORIZED).json({message: "Is this even possible?"});
+    return;
+  }
+  const currentUserId = getToken(token);
 
   //THIS SHOULDN'T BE POSSIBLE.
   if(!currentUserId){
