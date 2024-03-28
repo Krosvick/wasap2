@@ -47,6 +47,7 @@ export default function LoginPage() {
           <Input
             {...register("password")}
             placeholder="Password"
+            type="password"
             className="w-80"
             errorMessage={errors.password?.message}
           />
