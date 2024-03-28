@@ -10,17 +10,22 @@ import { STATUS_CODES, createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
-import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken} from "./helpers";
+import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken } from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
-import { leaveRoom, ISocketInfo, isValidConversation, saveMessage } from "./chat_helpers";
+import {
+  leaveRoom,
+  ISocketInfo,
+  isValidConversation,
+  saveMessage,
+} from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
 const app = express();
 
-const FRONTEND_PORT = process.env.FRONTEND_PORT
+const FRONTEND_PORT = process.env.FRONTEND_PORT;
 
 const corsOptions = {
   //vite port.
@@ -57,45 +62,52 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/conversations", convRouter);
 
 const server = createServer(app);
-export const io = new Server(server);
+export const io = new Server(server, {
+  cors: {
+    origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
+    credentials: true,
+  },
+});
 
-let storedUsers : ISocketInfo[] = [];
+let storedUsers: ISocketInfo[] = [];
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
   const cookief = socket.handshake.headers.cookie;
 
   //This should be the socket where the user enters conversation.
   //Should receive the conversation id.
-  socket.on('enter-conversation', async (data) => {
+  socket.on("enter-conversation", async (data) => {
     //delete previous data if any.
     storedUsers = leaveRoom(socket.id, storedUsers);
-  
-    const convId = data.conversation;
+
+    const convId = data.conversation.id;
     const userId = getCookieFromSocket(cookief);
-    
-    if(!userId || !convId) {
+    console.log(`User ${userId} is trying to join to ${convId}`);
+
+    if (!userId || !convId) {
       return;
     }
 
     //Make sure we joined the conversation.
-    await socket.join(convId);
+    const joinResponse = await socket.join(convId);
+    console.log(`User ${userId} joined to ${convId}`, joinResponse);
 
     //Send the status to clients in the 'Whatsapp-like' thing.
     socket.emit("user-status", {
-      status : "connected",
-    })
+      status: "connected",
+    });
 
-    storedUsers.push({id : socket.id, userId, convId});
+    storedUsers.push({ id: socket.id, userId, convId });
 
     debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convId}`);
-  })
+  });
 
   // Listen for incoming chat messages
-  socket.on('send-message', async (data) => {
-    let userId = getCookieFromSocket(cookief);
-  
-    if(!userId) {
+  socket.on("send-message", async (data) => {
+    const userId = getCookieFromSocket(cookief);
+
+    if (!userId) {
       return;
     }
 
@@ -106,40 +118,56 @@ io.on('connection', (socket) => {
         id: userId,
       },
       select: {
-        username : true,
-        id : true,
-      }
+        username: true,
+        id: true,
+      },
     });
-    
+
     if (!user) {
       return;
     }
 
-    let convTarget = storedUsers.find(sender => sender.userId === user.id)?.convId;
+    const convTarget = storedUsers.find(
+      (sender) => sender.userId === user.id,
+    )?.convId;
 
-    debugLogs(LOG_TYPES.INFO, `Trying to send a message to the room: ${convTarget} from ${user.username}`);
+    debugLogs(
+      LOG_TYPES.INFO,
+      `Trying to send a message to the room: ${convTarget} from ${user.username}`,
+    );
 
-    if(!convTarget)
-      return;
+    if (!convTarget) return;
 
     //Send message anyways.
-    io.to(convTarget).emit('send-message', {user : user.username, message : data.message});
+    io.to(convTarget).emit("send-message", {
+      user: user.username,
+      message: data.message,
+    });
 
     //LOG INFO ABOUT THE MESSAGE.
-    debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`);
+    debugLogs(
+      LOG_TYPES.INFO,
+      `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`,
+    );
 
-    let actualConv = await isValidConversation(convTarget);
+    const actualConv = await isValidConversation(convTarget);
 
-    if(!actualConv) {
-      debugLogs(LOG_TYPES.WARNING, `User ${user.username} is trying to send the ${data.message} message to DB in Room ${convTarget}`);
+    if (!actualConv) {
+      debugLogs(
+        LOG_TYPES.WARNING,
+        `User ${user.username} is trying to send the ${data.message} message to DB in Room ${convTarget}`,
+      );
       return;
     }
 
-    debugLogs(LOG_TYPES.INFO, `Saving to DB: User: ${user.username} Message: ${data.message}`);
+    debugLogs(
+      LOG_TYPES.INFO,
+      `Saving to DB: User: ${user.username} Message: ${data.message}`,
+    );
 
     await saveMessage(convTarget, data.message, user.username)
       .then((message) => {
-        console.log("Message saved!");
+        console.log("Message saved!", message.id);
       })
       .catch((err) => {
         debugLogs(LOG_TYPES.ERROR, err);
@@ -147,8 +175,8 @@ io.on('connection', (socket) => {
   });
 
   // Listen for user disconnection
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
     storedUsers = leaveRoom(socket.id, storedUsers);
   });
 });
@@ -161,32 +189,42 @@ app.get("/form", (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/login.html");
 });
 
-app.get("/conversation_test/:convId/", authenticateJWTCookie, async (req: Request, res: Response) => {
-  const convId = req.params.convId;
-  //same as lua array thing.
-  const token = req.cookies.token;
+app.get(
+  "/conversation_test/:convId/",
+  authenticateJWTCookie,
+  async (req: Request, res: Response) => {
+    const convId = req.params.convId;
+    //same as lua array thing.
+    const token = req.cookies.token;
 
-  if (!token) {
-    res.status(StatusCodes.UNAUTHORIZED).json({message: "Is this even possible?"});
-    return;
-  }
-  const currentUserId = getToken(token);
+    if (!token) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Is this even possible?" });
+      return;
+    }
+    const currentUserId = getToken(token);
 
-  //THIS SHOULDN'T BE POSSIBLE.
-  if(!currentUserId){
-    res.status(StatusCodes.UNAUTHORIZED).json({message : "You need to log in."});
-    return;
-  }
+    //THIS SHOULDN'T BE POSSIBLE.
+    if (!currentUserId) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "You need to log in." });
+      return;
+    }
 
-  const isValid = await isValidConversation(convId, currentUserId);
+    const isValid = await isValidConversation(convId, currentUserId);
 
-  if(!isValid) {
-    res.status(StatusCodes.FORBIDDEN).json({message: "This is not the conversation of yours or it was not found."});
-    return;
-  }
+    if (!isValid) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        message: "This is not the conversation of yours or it was not found.",
+      });
+      return;
+    }
 
-  res.sendFile(VIEWS_DIR + "/conversation_live.html");
-});
+    res.sendFile(VIEWS_DIR + "/conversation_live.html");
+  },
+);
 
 //display this url on the message.
 const DEVELOPMENT_URL = process.env.DEVELOPMENT_URL;
