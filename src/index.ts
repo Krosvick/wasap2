@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken} from "./helpers";
 import prisma from "./db/prisma";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
-import { leaveRoom, ISocketInfo } from "./chat_helpers";
+import { leaveRoom, ISocketInfo, isValidConversation } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
@@ -117,6 +117,11 @@ io.on('connection', (socket) => {
       if (convTarget){
         io.to(convTarget).emit('chat message', {user : user?.username, message : data.message});
         debugLogs(LOG_TYPES.INFO, `Message Info: Room ${convTarget}, User: ${user?.username} Message: ${data.message}`);
+
+        // callback ahh moment.
+        //THIS IS FOR ONLY THE CASE THE ROOM IS RANDOM!!!!!!
+        if(!isValidConversation(convTarget)) 
+          return;
       }
     }).catch((err) => {
       console.log("error feo");

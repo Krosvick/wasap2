@@ -42,7 +42,18 @@
     fetch(`${BASE_URL}/api/conversations/${convId}`, OPTIONS).
       then(resp => resp.json())
       .then(data => {
-        console.log(data);
+        //console.log(data);
+        let messages = data.messages;
+        if (messages.length < 1) {
+          return;
+        }
+
+        messages.forEach(msg => {
+          const messages = document.getElementById('messages');
+          const li = document.createElement('li');
+          li.textContent = `${msg.sender.username}: ${msg.content}`;
+          messages.appendChild(li);
+        })
       });
 
     // Handle incoming chat messages
