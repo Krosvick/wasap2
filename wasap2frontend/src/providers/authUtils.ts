@@ -6,6 +6,7 @@ export const AuthContext = createContext<ContextJWT>({
   token: Cookies.get("token") || undefined,
   userId: undefined,
   setToken: () => {},
+  logout: () => {},
 });
 
 export const useAuth = () => {

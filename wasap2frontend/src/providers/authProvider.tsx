@@ -8,7 +8,8 @@ import { UserJWT } from "../services/userService";
 export type ContextJWT = {
   token: string | undefined;
   userId: string | undefined;
-  setToken: (newToken: string) => void;
+  setToken: (newToken: string | undefined) => void;
+  logout: () => void;
 };
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -19,8 +20,12 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
   // Function to set the authentication token
-  const setToken = (newToken: string) => {
+  const setToken = (newToken: string | undefined) => {
     setToken_(newToken);
+  };
+
+  const logout = () => {
+    setToken(undefined);
   };
 
   useEffect(() => {
@@ -49,6 +54,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       token,
       userId,
       setToken,
+      logout,
     }),
     [token],
   );
