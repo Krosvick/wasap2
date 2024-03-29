@@ -63,13 +63,6 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/conversations", convRouter);
 
 const server = createServer(app);
-export const io = new Server(server, {
-  cors: {
-    origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
-    credentials: true,
-  },
-});
-
 const liveChat = new LiveChatSocket(server, {
   cors: {
     origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
