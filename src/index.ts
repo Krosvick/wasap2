@@ -20,6 +20,7 @@ import {
   saveMessage,
 } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
+import { LiveChatSocket } from "./sockets/wrappers";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -69,6 +70,15 @@ export const io = new Server(server, {
   },
 });
 
+const liveChat = new LiveChatSocket(server, {
+  cors: {
+    origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
+    credentials: true,
+  },
+})
+
+liveChat.initialize();
+/*
 let storedUsers: ISocketInfo[] = [];
 
 io.on("connection", (socket) => {
@@ -179,7 +189,7 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
     storedUsers = leaveRoom(socket.id, storedUsers);
   });
-});
+});*/
 
 app.get("/socket", authenticateJWTCookie, (req: Request, res: Response) => {
   res.sendFile(VIEWS_DIR + "/socket_test.html");
