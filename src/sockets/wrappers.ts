@@ -198,4 +198,4 @@ class LiveChatSocket extends BaseSocket {
   }
 }
 
-export { LiveChatSocket };
+export { LiveChatSocket, BaseSocket };
