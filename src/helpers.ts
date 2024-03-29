@@ -3,65 +3,72 @@ import cookie from "cookie";
 import jwt from "jsonwebtoken";
 
 enum LOG_TYPES {
-    NONE = 0,
-    ERROR = 1,
-    WARNING = 2,
-    INFO = 3,
+  NONE = 0,
+  ERROR = 1,
+  WARNING = 2,
+  INFO = 3,
 }
 
 const MESSAGES = {
-    [LOG_TYPES.NONE] : "",
-    [LOG_TYPES.ERROR] : "[ERROR]",
-    [LOG_TYPES.WARNING] : "[WARNING]",
-    [LOG_TYPES.INFO] : "[INFO]",
-}
+  [LOG_TYPES.NONE]: "",
+  [LOG_TYPES.ERROR]: "[ERROR]",
+  [LOG_TYPES.WARNING]: "[WARNING]",
+  [LOG_TYPES.INFO]: "[INFO]",
+};
 
 interface UserJWT {
-    id : string;
-    iat : number;
-    exp : number;
+  id: string;
+  iat: number;
+  exp: number;
 }
 
 function excludeAttrByMany<T extends object>(obj: T[], key: keyof T): void {
-    obj.forEach(data => delete data[key]);
+  obj.forEach((data) => delete data[key]);
 }
 
-function excludeAttrByOne(obj : object, keyToDelete : string) {
-    return Object.fromEntries(Object.entries(obj).filter(([key]) => key !== keyToDelete));
+function excludeAttrByOne(obj: object, keyToDelete: string) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => key !== keyToDelete),
+  );
 }
 
-function getToken(tokenCookie : string) : string | undefined {
-    const decodedToken = jwt.decode(tokenCookie, {complete : true});
+function getToken(tokenCookie: string): string | undefined {
+  const decodedToken = jwt.decode(tokenCookie, { complete: true });
 
-    if (!decodedToken) 
-        return;
+  if (!decodedToken) return;
 
-    const payload = decodedToken.payload as UserJWT;
-    return payload.id;
+  const payload = decodedToken.payload as UserJWT;
+  return payload.id;
 }
 
-function getCookieFromSocket(cookieTarget : string = "") : string | undefined {
-    //Imagine providing no cookies.
-    if(cookieTarget === "") 
-        return;
+function getCookieFromSocket(cookieTarget: string = ""): string | undefined {
+  //Imagine providing no cookies.
+  if (cookieTarget === "") return;
 
-    const parsedCookies = cookie.parse(cookieTarget);
-    const token = parsedCookies.token;
+  const parsedCookies = cookie.parse(cookieTarget);
+  const token = parsedCookies.token;
 
-    if(!token) 
-        return;
+  if (!token) return;
 
-    return getToken(token);
-};
+  return getToken(token);
+}
 
 //very basic way to log things.
-function debugLogs(mode : LOG_TYPES, ...args : any[]) {
-    const shouldDisplay = Boolean(process.env.LOG);
-    if (!shouldDisplay) {
-        return;
-    }
+function debugLogs(mode: LOG_TYPES, ...args: any[]) {
+  const shouldDisplay = Boolean(process.env.LOG);
+  if (!shouldDisplay) {
+    return;
+  }
 
-    console.log(MESSAGES[mode], ...args);
+  console.log(MESSAGES[mode], ...args);
 }
 
-export {excludeAttrByOne, excludeAttrByMany, debugLogs, LOG_TYPES, getCookieFromSocket, UserJWT, getToken};
+export {
+  excludeAttrByOne,
+  excludeAttrByMany,
+  debugLogs,
+  LOG_TYPES,
+  getCookieFromSocket,
+  UserJWT,
+  getToken,
+};
