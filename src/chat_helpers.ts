@@ -1,47 +1,67 @@
 import prisma from "./db/prisma";
 
-interface ISocketInfo {
-    id: string;
-    userId : string;
-    convId : string;
+type ISocketInfo = {
+  id: string;
+  userId: string;
+  convId: string;
 }
 
-const leaveRoom = (socketId : string, allUsers : ISocketInfo[]) => {
-    return allUsers.filter(user => user.id !== socketId);
-}
+type OptionsInterface = {
+  cors?: {
+    origin: string;
+    credentials: boolean;
+  };
+};
 
-const isValidConversation = async (convId : string, participantId? : string | undefined) => {
-    return !!await prisma.conversation.findFirst({
-        where: {
-            id: convId,
-            participants: {
-                some: {
-                  id: participantId,
-                }
-            }
+const leaveRoom = (socketId: string, allUsers: ISocketInfo[]) => {
+  return allUsers.filter((user) => user.id !== socketId);
+};
+
+const isValidConversation = async (
+  convId: string,
+  participantId?: string | undefined,
+) => {
+  return !!(await prisma.conversation.findFirst({
+    where: {
+      id: convId,
+      participants: {
+        some: {
+          id: participantId,
         },
-        select: {
-            id: true,
-        }
-    });
-}
+      },
+    },
+    select: {
+      id: true,
+    },
+  }));
+};
 
-const saveMessage = async (convId : string, content : string, username : string) => {
-    return prisma.message.create({
-        data: {
-          content: content,
-          sender: {
-            connect: {
-              username: username,
-            },
-          },
-          conversation: {
-            connect: {
-              id: convId,
-            },
-          },
+const saveMessage = async (
+  convId: string,
+  content: string,
+  username: string,
+) => {
+  return prisma.message.create({
+    data: {
+      content: content,
+      sender: {
+        connect: {
+          username: username,
         },
-    });
-} 
+      },
+      conversation: {
+        connect: {
+          id: convId,
+        },
+      },
+    },
+  });
+};
 
-export {leaveRoom, ISocketInfo, isValidConversation, saveMessage}
+export {
+  leaveRoom,
+  ISocketInfo,
+  OptionsInterface,
+  isValidConversation,
+  saveMessage,
+};
