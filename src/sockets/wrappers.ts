@@ -25,6 +25,15 @@ abstract class BaseSocket {
 
   public initialize() {
     this.ioSocket.on("connection", (socket) => {
+      const user = this.getUser(socket);
+
+      if (user) {
+        socket.emit("check-duplicate", {
+          user: user.userId,
+          duplicated: !!user,
+        });
+      }
+
       socket.on(
         "enter-conversation",
         async (data) => await this.onConversationJoin(socket, data),
@@ -35,6 +44,18 @@ abstract class BaseSocket {
       );
       socket.on("disconnect", () => this.onDisconnect(socket));
     });
+  }
+
+  public getUser(socket: Socket) {
+    const cookief = this.getCookies(socket);
+    const userId = getCookieFromSocket(cookief);
+
+    if (!userId) {
+      return false;
+    }
+
+    const user = this.allUsers.find((userObj) => userObj.userId === userId);
+    return user;
   }
 
   public getCookies(socket: Socket) {
@@ -52,6 +73,13 @@ abstract class BaseSocket {
 
   public deleteUserFromSocket(socket: Socket) {
     this.allUsers = leaveRoom(socket.id, this.allUsers);
+  }
+}
+
+//TODO: Implement.
+class StaticChatSocket extends BaseSocket {
+  constructor(server: HttpServer, options: Partial<OptionsInterface>) {
+    super(server, options);
   }
 }
 
