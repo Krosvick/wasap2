@@ -28,12 +28,15 @@ abstract class BaseSocket {
       const user = this.getUser(socket);
 
       if (user) {
-        socket.emit("check-duplicate", {
+        socket.broadcast.to(user.id).emit("check-duplicate", {
           user: user.userId,
           duplicated: !!user,
         });
       }
-
+      socket.on(
+        "join-conversations",
+        async (data) => await this.onSocketJoin(socket, data),
+      );
       socket.on(
         "enter-conversation",
         async (data) => await this.onConversationJoin(socket, data),
@@ -46,7 +49,7 @@ abstract class BaseSocket {
     });
   }
 
-  public getUser(socket: Socket) {
+  public getUser(socket: Socket): ISocketInfo | false {
     const cookief = this.getCookies(socket);
     const userId = getCookieFromSocket(cookief);
 
@@ -55,6 +58,9 @@ abstract class BaseSocket {
     }
 
     const user = this.allUsers.find((userObj) => userObj.userId === userId);
+    if (!user) {
+      return false;
+    }
     return user;
   }
 
@@ -63,7 +69,11 @@ abstract class BaseSocket {
   }
 
   //IMPLEMENT THIS PLS.
-  public async onConversationJoin(socket: Socket, data: any[]) {}
+  public async onSocketJoin(socket: Socket, data: any) {}
+
+  public async onConversationJoin(socket: Socket, data: any) {}
+
+  public async onMessageReceive(socket: Socket, data: any[]) {}
 
   public async onMessageSend(socket: Socket, data: any[]) {}
 
@@ -81,6 +91,51 @@ class StaticChatSocket extends BaseSocket {
   constructor(server: HttpServer, options: Partial<OptionsInterface>) {
     super(server, options);
   }
+  private pushUserToSocket(socket: Socket, userId: string, convIds: string[]) {
+    //here we push the user to the allUsers array.
+    //if the user is already in the array, push the socket.id to the id array. and leave the userId and convId as is.
+    const user = this.allUsers.find((user) => user.userId === userId);
+    if (user) {
+      user.id.push(socket.id);
+      return;
+    } else {
+      this.allUsers.push({
+        id: [socket.id],
+        userId: userId,
+        convId: convIds,
+      });
+    }
+  }
+
+  override async onSocketJoin(
+    socket: Socket,
+    data: { conversations: string[] },
+  ) {
+    const cookief = this.getCookies(socket);
+    const convIds = data.conversations;
+    const userId = getCookieFromSocket(cookief);
+
+    console.log(`User ${userId} is trying to join to ${convIds}`);
+
+    console.log(data);
+
+    if (!userId || !convIds) {
+      return;
+    }
+
+    //Make sure we joined the conversation.
+    const joinResponse = await socket.join(convIds);
+    console.log(`User ${userId} joined to ${convIds}`, joinResponse);
+
+    //Send the status to clients in the 'Whatsapp-like' thing.
+    socket.emit("user-status", {
+      status: "connected",
+    });
+
+    this.pushUserToSocket(socket, userId, convIds);
+
+    debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convIds}`);
+  }
 }
 
 class LiveChatSocket extends BaseSocket {
@@ -88,8 +143,20 @@ class LiveChatSocket extends BaseSocket {
     super(server, options);
   }
 
-  private pushUserToSocket(socket: Socket, userId: string, convId: string) {
-    this.allUsers.push({ id: socket.id, userId, convId });
+  private pushUserToSocket(socket: Socket, userId: string, convIds: string[]) {
+    //here we push the user to the allUsers array.
+    //if the user is already in the array, push the socket.id to the id array. and leave the userId and convId as is.
+    const user = this.allUsers.find((user) => user.userId === userId);
+    if (user) {
+      user.id.push(socket.id);
+      return;
+    } else {
+      this.allUsers.push({
+        id: [socket.id],
+        userId: userId,
+        convId: convIds,
+      });
+    }
   }
 
   public override initialize(): void {
@@ -124,6 +191,38 @@ class LiveChatSocket extends BaseSocket {
     this.pushUserToSocket(socket, userId, convId);
 
     debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convId}`);
+  }
+  override async onSocketJoin(
+    socket: Socket,
+    data: { conversations: string[] },
+  ) {
+    //storedUsers = leaveRoom(socket.id, storedUsers);
+    this.deleteUserFromSocket(socket);
+
+    const cookief = this.getCookies(socket);
+    const convIds = data.conversations;
+    const userId = getCookieFromSocket(cookief);
+
+    console.log(`User ${userId} is trying to join to ${convIds}`);
+
+    console.log(data);
+
+    if (!userId || !convIds) {
+      return;
+    }
+
+    //Make sure we joined the conversation.
+    const joinResponse = await socket.join(convIds);
+    console.log(`User ${userId} joined to ${convIds}`, joinResponse);
+
+    //Send the status to clients in the 'Whatsapp-like' thing.
+    socket.emit("user-status", {
+      status: "connected",
+    });
+
+    this.pushUserToSocket(socket, userId, convIds);
+
+    debugLogs(LOG_TYPES.INFO, `User ${userId} joined to ${convIds}`);
   }
 
   override async onMessageSend(socket: Socket, data: any) {
@@ -173,7 +272,7 @@ class LiveChatSocket extends BaseSocket {
       `Message Info: Room ${convTarget}, User: ${user.username} Message: ${data.message}`,
     );
 
-    const actualConv = await isValidConversation(convTarget);
+    const actualConv = await isValidConversation(convTarget[0]);
 
     if (!actualConv) {
       debugLogs(
@@ -188,7 +287,7 @@ class LiveChatSocket extends BaseSocket {
       `Saving to DB: User: ${user.username} Message: ${data.message}`,
     );
 
-    await saveMessage(convTarget, data.message, user.username)
+    await saveMessage(convTarget[0], data.message, user.username)
       .then((message) => {
         console.log("Message saved!", message.id);
       })

@@ -1,16 +1,7 @@
-import { getApiUrl } from "../config";
-import { axios } from "../providers/axiosProvider";
-import { useMutation } from "@tanstack/react-query";
 import { sendMessage } from "../components/sendMessage";
+import socket from "../providers/socketioProvider";
 
-const sendMessage = async (data: sendMessage) => {
-  const sendMessageUrl = getApiUrl("/messages");
-  const response = await axios.post(sendMessageUrl, data);
-  return response;
+export const emitMessage = async (data: sendMessage) => {
+  socket.emit("send-message", data);
 };
 
-export const useSendMessage = () => {
-  return useMutation({
-    mutationFn: (data: sendMessage) => sendMessage(data),
-  });
-};

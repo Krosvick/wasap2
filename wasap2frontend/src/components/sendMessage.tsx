@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sendMessageSchema } from "../../../src/schemas/messagesSchema";
 import { z } from "zod";
-import { useSendMessage } from "../services/messageService";
+import { emitMessage } from "../services/messageService";
 
 export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 
@@ -18,24 +18,19 @@ export default function SendMessage() {
     resolver: zodResolver(sendMessageSchema.body),
   });
 
-  const { mutateAsync, isSuccess, data, isError } = useSendMessage();
-
-  if (isSuccess) {
-    console.log(data);
-  }
 
   return (
     <div className="flex flex-col justify-center items-start h-fit my-2">
       <form
         onSubmit={handleSubmit((data) => {
-          mutateAsync({ ...data });
+          emitMessage(data);
         })}
         className="flex gap-3 w-full"
       >
         <Input
           {...register("message")}
           placeholder="Mensaje"
-          errorMessage={errors.message?.message || isError}
+          errorMessage={errors.message?.message}
         />
         <Button
           type="submit"
@@ -46,9 +41,6 @@ export default function SendMessage() {
           Send
         </Button>
       </form>
-      {isError && (
-        <p className="text-red-700 font-semibold">Error con el mensaje</p>
-      )}
     </div>
   );
 }

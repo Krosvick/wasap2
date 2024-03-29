@@ -1,17 +1,22 @@
 import { useGetConversations } from "../services/contactsService";
 import { Link } from "react-router-dom";
 import { Avatar, Chip } from "@nextui-org/react";
+import socket from "../providers/socketioProvider";
 
 export default function Contacts({ userId }: { userId: string }) {
-  const { data, isSuccess } = useGetConversations(userId);
-  console.log(isSuccess);
+  const { data } = useGetConversations(userId);
+  const conversationsIds = data?.map((conversation) => conversation.id);
+  socket.emit("join-conversations", { conversations: conversationsIds });
   return (
     <div>
       <ul className="flex flex-col gap-3 h-full w-full">
         {data?.map((conversation) => (
           <li className="w-full" key={conversation.id}>
             {conversation.participants.map((participant) => (
-              <Link to={"contact/" + conversation.id} key={participant.username}>
+              <Link
+                to={"contact/" + conversation.id}
+                key={participant.username}
+              >
                 <Chip
                   variant="solid"
                   radius="sm"

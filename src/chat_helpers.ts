@@ -1,9 +1,9 @@
 import prisma from "./db/prisma";
 
 type ISocketInfo = {
-  id: string;
+  id: string[];
   userId: string;
-  convId: string;
+  convId: string[];
 }
 
 type OptionsInterface = {
@@ -14,7 +14,8 @@ type OptionsInterface = {
 };
 
 const leaveRoom = (socketId: string, allUsers: ISocketInfo[]) => {
-  return allUsers.filter((user) => user.id !== socketId);
+  //here return all users except the one with the socketId
+  return allUsers.filter((user) => user.id[0] !== socketId);
 };
 
 const isValidConversation = async (
