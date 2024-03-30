@@ -21,10 +21,17 @@ export async function conversationLoader({
   const payload = decodedToken as UserJWT;
   const userId = payload.id;
   const conversation = await getConversationMessages(userId, conversationId);
-  return { conversation };
+  return { conversation, userId };
 }
 export default function Chat() {
-  const data = useLoaderData() as { conversation: Conversation };
+  const data = useLoaderData() as {
+    conversation: Conversation;
+    userId: string;
+  };
+  const receiverId = data.conversation.participants.find(
+    (participant) => participant.id !== data.userId,
+  )?.id;
+  console.log(data);
   if (!data.conversation) {
     return <div>Not authorized</div>;
   }
@@ -68,7 +75,10 @@ export default function Chat() {
         </ul>
       </div>
       <div className="flex-shrink-0">
-        <SendMessage />
+        <SendMessage
+          conversationId={data.conversation.id}
+          receiverId={receiverId!}
+        />
       </div>
     </div>
   );
