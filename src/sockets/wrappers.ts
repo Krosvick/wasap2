@@ -78,7 +78,10 @@ abstract class BaseSocket {
 
   public async onMessageReceive(socket: Socket, data: any[]) {}
 
-  public async onMessageSend(socket: Socket, data: SendMessageTypeBackend) {}
+  public abstract onMessageSend(
+    socket: Socket,
+    data: SendMessageTypeBackend,
+  ): void;
 
   public onDisconnect(socket: Socket) {
     this.deleteUserFromSocket(socket);
@@ -175,7 +178,12 @@ class StaticChatSocket extends BaseSocket {
       `Trying to send a message to user ${receiverId} from ${user.username}`,
     );
     if (receiverTargetSocketId && actualConv) {
-      this.ioSocket.to(receiverTargetSocketId).emit("send-message", {
+      socket.broadcast.to(receiverTargetSocketId).emit("send-message", {
+        user: user.username,
+        message: message,
+        convId: conversationId,
+      });
+      socket.to(socket.id).emit("message-sent", {
         user: user.username,
         message: message,
         convId: conversationId,
@@ -203,6 +211,11 @@ class StaticChatSocket extends BaseSocket {
     await saveMessage(conversationId, data.message, user.username)
       .then((message) => {
         console.log("Message saved!", message.id);
+        socket.to(socket.id).emit("message-sent", {
+          user: user.username,
+          message: message.content,
+          convId: conversationId,
+        });
       })
       .catch((err) => {
         debugLogs(LOG_TYPES.ERROR, err);
