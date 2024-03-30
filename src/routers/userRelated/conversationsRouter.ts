@@ -14,6 +14,7 @@ const findConversations = async (participantId: string = "") => {
       id: true,
       participants: {
         select: {
+          id: true,
           username: true,
         },
         where: {
@@ -79,6 +80,7 @@ convRouter.get("/:convId", async (req: Request, res: Response) => {
       id: true,
       participants: {
         select: {
+          id: true,
           username: true,
         },
       },
