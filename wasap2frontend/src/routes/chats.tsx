@@ -4,7 +4,21 @@ import { Image } from "@nextui-org/react";
 import SendMessage from "../components/sendMessage";
 import socket from "../providers/socketioProvider";
 
-
+export async function conversationLoader({
+  params,
+}: {
+  params: { conversationId: string };
+}) {
+  const conversationId = params.conversationId;
+  if (!Cookies.get("token")) {
+    return { conversation: null };
+  }
+  const decodedToken = jwtDecode(Cookies.get("token")!);
+  const payload = decodedToken as UserJWT;
+  const userId = payload.id;
+  const conversation = await getConversationMessages(userId, conversationId);
+  return { conversation, userId };
+}
 export default function Chat() {
   const data = useLoaderData() as {
     conversation: Conversation;
