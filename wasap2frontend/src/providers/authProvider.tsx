@@ -17,7 +17,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   //get token from cookie
   const [token, setToken_] = useState<string | undefined>(Cookies.get("token"));
   const [userId, setUserId] = useState<string | undefined>();
-  const [isExpired, setIsExpired] = useState<boolean>(false);
 
   // Function to set the authentication token
   const setToken = (newToken: string | undefined) => {
@@ -34,17 +33,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const payload = decodedToken as UserJWT;
       const userId = payload.id;
       setUserId(userId);
-      const exp = payload.exp;
-      const isExpired = Date.now() >= exp * 999;
-      setIsExpired(isExpired);
     }
-    if (token && !isExpired) {
+    if (token) {
       axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       setToken(token);
     } else {
       delete axios.defaults.headers.common["Authorization"];
-      Cookies.remove("token");
-      setUserId(undefined);
+      setToken(undefined);
     }
   }, [token]);
 
@@ -56,7 +51,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken,
       logout,
     }),
-    [token],
+    [token, userId],
   );
 
   // Provide the authentication context to the children components
