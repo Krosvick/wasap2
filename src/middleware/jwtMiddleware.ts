@@ -11,19 +11,25 @@ function generateAccessToken(id: string): string {
   return jwt.sign({ id: id }, secret, { expiresIn: "1h" });
 }
 
-function authenticateJWTCookie(req: Request, res: Response, next: NextFunction) {
+function authenticateJWTCookie(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const token = req.cookies["token"];
 
-  if (!token) 
-    return res.sendStatus(StatusCodes.UNAUTHORIZED);
+  if (!token) return res.sendStatus(StatusCodes.UNAUTHORIZED);
 
-  const verify = jwt.verify(token, process.env.JWT_SECRET as string);
-  if (verify) {
-    next();
-  } else {
+  try {
+    const verify = jwt.verify(token, process.env.JWT_SECRET as string);
+    if (verify) {
+      next();
+    }
+  } catch (error) {
+    res.clearCookie("token");
     res.statusCode = StatusCodes.UNAUTHORIZED;
+    res.send("Unauthorized");
   }
 }
-
 
 export { generateAccessToken, authenticateJWTCookie };
