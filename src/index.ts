@@ -5,7 +5,6 @@ import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
-import { Server } from "socket.io";
 import { STATUS_CODES, createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
@@ -20,7 +19,7 @@ import {
   saveMessage,
 } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
-import { LiveChatSocket } from "./sockets/wrappers";
+import { LiveChatSocket, StaticChatSocket } from "./sockets/wrappers";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -63,7 +62,7 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/conversations", convRouter);
 
 const server = createServer(app);
-const liveChat = new LiveChatSocket(server, {
+const liveChat = new StaticChatSocket(server, {
   cors: {
     origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
     credentials: true,
