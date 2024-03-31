@@ -8,7 +8,7 @@ export default function Contacts({ userId }: { userId: string }) {
   const conversationsIds = data?.map((conversation) => conversation.id);
   socket.emit("join-conversations", { conversations: conversationsIds });
   return (
-    <div>
+    <div className="flex overflow-y-auto">
       <ul className="flex flex-col gap-3 h-full w-full">
         {data?.map((conversation) => (
           <li className="w-full" key={conversation.id}>
