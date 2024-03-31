@@ -146,6 +146,7 @@ class StaticChatSocket extends BaseSocket {
 
     const { conversationId, message, receiverId } = data;
 
+
     if (!userId) {
       return;
     }
@@ -211,7 +212,7 @@ class StaticChatSocket extends BaseSocket {
     await saveMessage(conversationId, data.message, user.username)
       .then((message) => {
         console.log("Message saved!", message.id);
-        socket.to(socket.id).emit("message-sent", {
+        socket.to(socket.id).emit("message-sent-db", {
           user: user.username,
           message: message.content,
           convId: conversationId,
