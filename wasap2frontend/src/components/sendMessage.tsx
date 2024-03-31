@@ -11,16 +11,24 @@ export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 export default function SendMessage({
   conversationId,
   receiverId,
+  onDataFromChild,
 }: {
   conversationId: string;
   receiverId: string;
+  onDataFromChild: ({
+    message,
+    createdAt,
+  }: {
+    message: string;
+    createdAt: string;
+  }) => void;
 }) {
   //simple input and button to add a contact by username
-
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty, isValid },
+    reset,
   } = useForm<sendMessage>({
     resolver: zodResolver(sendMessageSchema.body),
   });
@@ -29,18 +37,26 @@ export default function SendMessage({
     <div className="flex flex-col justify-center items-start h-fit my-2">
       <form
         onSubmit={handleSubmit((data) => {
+          reset();
+          const createdAt = new Date().toISOString();
           const updatedData = {
             ...data,
             receiverId: receiverId,
-            conversationId: conversationId,
+            conversationId,
           };
           emitMessage(updatedData);
+          onDataFromChild({
+            ...data,
+            createdAt,
+          });
         })}
         className="flex gap-3 w-full"
       >
         <Input
           {...register("message")}
           placeholder="Mensaje"
+          type="text"
+          autoFocus
           errorMessage={errors.message?.message}
         />
         <Button
