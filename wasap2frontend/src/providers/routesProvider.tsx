@@ -1,5 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { useAuth } from "./authUtils";
+import { useAuth } from "./authProvider";
 import { ProtectedRoute } from "../routes/protectedRoute";
 import Chat from "../routes/chats";
 import { conversationLoader } from "../loaders/conversationLoader";

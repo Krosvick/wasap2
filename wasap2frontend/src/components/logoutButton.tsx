@@ -1,5 +1,5 @@
 import { Button } from "@nextui-org/react";
-import { useAuth } from "../providers/authUtils";
+import { useAuth } from "../providers/authProvider";
 
 export default function LogoutButton() {
   const { logout } = useAuth();
