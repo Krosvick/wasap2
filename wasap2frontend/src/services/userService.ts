@@ -1,8 +1,6 @@
 import { getApiUrl } from "../config";
 import { axios } from "../providers/axiosProvider";
 import { useQuery } from "@tanstack/react-query";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 
 export interface UserJWT {
   id: string;
@@ -10,19 +8,18 @@ export interface UserJWT {
   exp: number;
 }
 
-const getUserDetails = async () => {
-  const decodedToken = jwtDecode(Cookies.get("token")!);
-  if (!decodedToken) return;
-  const payload = decodedToken as UserJWT;
-  const userId = payload.id;
+const getUserDetails = async ({ userId }: { userId: string }) => {
+  if (!userId) {
+    return Error("No user id provided");
+  }
   const userDetailsUrl = getApiUrl("/users/" + userId);
   const response = await axios.get(userDetailsUrl);
   return response.data;
 };
 
-export const useGetUserDetails = () => {
+export const useGetUserDetails = (userId: string) => {
   return useQuery({
     queryKey: ["userDetails"],
-    queryFn: getUserDetails,
+    queryFn: () => getUserDetails({ userId }),
   });
 };
