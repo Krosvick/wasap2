@@ -4,6 +4,7 @@ import crypto from "crypto";
 
 const IV_LENGTH = 16;
 const KEY_LENGTH = 32;
+const BASE_ENCODING = "hex";
 
 const doRandomKey = () => {
     return crypto.randomBytes(KEY_LENGTH);
@@ -11,4 +12,11 @@ const doRandomKey = () => {
 
 const doRandomIV = () => crypto.randomBytes(IV_LENGTH);
 
-export {doRandomIV, doRandomKey};
+const toBuffer = (iv : string, key : string) => {
+    const bufferIv = Buffer.from(iv, BASE_ENCODING);
+    const bufferKey = Buffer.from(key, BASE_ENCODING);
+
+    return [bufferIv, bufferKey];
+}
+
+export {doRandomIV, doRandomKey, toBuffer};

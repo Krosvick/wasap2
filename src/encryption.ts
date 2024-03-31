@@ -10,10 +10,4 @@ const KEY = process.env.CRYPTO_KEY;//crypto.randomBytes(32);
 //This 16.
 const IV = process.env.CRYPTO_IV;//crypto.randomBytes(16);
 
-const stringfied = IV.toString('hex');
-
-console.log(IV, Buffer.from(stringfied, 'hex'));
-
-console.log("KEY OF THE ALGORITHM: ", KEY.toString('hex'), "Initializtation vector: ", IV.toString('hex'));
-
 
