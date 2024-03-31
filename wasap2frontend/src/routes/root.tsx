@@ -27,12 +27,12 @@ export default function Root() {
     <main className="flex w-screen h-screen">
       <ToastContainer />
       <div className="flex flex-col justify-between w-1/4 h-full bg-emerald-600 p-5 text-zinc-100">
-        <div>
+        <div className="flex flex-col max-h-full">
           <AddContactForm userData={data} />
           {isLoading && <p>Loading...</p>}
           {isSuccess && <Contacts userId={userId!} />}
+          <LogoutButton />
         </div>
-        <LogoutButton />
       </div>
       <div className="w-full h-full">
         <Outlet />
