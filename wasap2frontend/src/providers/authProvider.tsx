@@ -2,7 +2,6 @@ import React, { createContext, ReactNode, useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { UserJWT } from "../services/userService";
-import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
 type UserContextType = {
@@ -43,7 +42,7 @@ export default function UserProvider({ children }: Props) {
       const decodedToken = jwtDecode<UserJWT>(token);
       const userId = decodedToken?.id;
       setUserId(userId);
-      toast.success("Login Successful :)");
+    
     }
   };
 
