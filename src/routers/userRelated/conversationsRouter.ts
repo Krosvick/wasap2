@@ -53,7 +53,6 @@ convRouter.get(
   authenticateJWTCookie,
   async (req: Request, res: Response) => {
     const userId = req.params.userId;
-
     if (userId) {
       const conversations = await findConversations(userId);
 
@@ -70,41 +69,45 @@ convRouter.get(
   },
 );
 
-convRouter.get("/:convId", authenticateJWTCookie,async (req: Request, res: Response) => {
-  const convId = req.params.convId;
-  const conversation = await prisma.conversation.findUnique({
-    where: {
-      id: convId,
-    },
-    select: {
-      id: true,
-      participants: {
-        select: {
-          id: true,
-          username: true,
+convRouter.get(
+  "/:convId",
+  authenticateJWTCookie,
+  async (req: Request, res: Response) => {
+    const convId = req.params.convId;
+    const conversation = await prisma.conversation.findUnique({
+      where: {
+        id: convId,
+      },
+      select: {
+        id: true,
+        participants: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        messages: {
+          select: {
+            id: true,
+            content: true,
+            sender: { select: { username: true } },
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
         },
       },
-      messages: {
-        select: {
-          id: true,
-          content: true,
-          sender: { select: { username: true } },
-          createdAt: true,
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-    },
-  });
+    });
 
-  if (!conversation) {
-    res.status(StatusCodes.NOT_FOUND).send("Conversation not found!");
-    return;
-  }
+    if (!conversation) {
+      res.status(StatusCodes.NOT_FOUND).send("Conversation not found!");
+      return;
+    }
 
-  res.json(conversation);
-});
+    res.json(conversation);
+  },
+);
 
 convRouter.post(
   "/:convId/send",
