@@ -1,4 +1,4 @@
-import { Input, Button } from "@nextui-org/react";
+import { Input, Button, Image } from "@nextui-org/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addFriendSchema } from "../../../src/schemas/userSchema";
@@ -34,7 +34,13 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
 
   return (
     <div className="flex flex-col justify-center items-start h-fit my-2">
-      <h1 className="text-xl font-bold m-1">WASAP2</h1>
+      <Image
+        src="https://images3.memedroid.com/images/UPLOADED199/64d8460d85072.jpeg"
+        alt="wasap2"
+        width="200"
+        height="50"
+        className="m-1"
+      />
       <h2 className="text-xl font-bold pb-1">Añadir contacto</h2>
       <form
         onSubmit={handleSubmit((data) => {
@@ -53,12 +59,14 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
           isDisabled={!isDirty || !isValid}
           color="secondary"
         >
-          Add Contact
+          Añadir
         </Button>
       </form>
-      {isError && 
-        <p className="text-red-700 font-semibold">Contacto ya agregado, viva la republica popular China!!!!</p>
-      }
+      {isError && (
+        <p className="text-red-700 font-semibold">
+          Contacto ya agregado, viva la republica popular China!!!!
+        </p>
+      )}
     </div>
   );
 }

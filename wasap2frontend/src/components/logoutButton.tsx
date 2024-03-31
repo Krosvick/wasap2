@@ -9,6 +9,7 @@ export default function LogoutButton() {
       onClick={() => {
         logout();
       }}
+      className="p-5 mt-3 w-full"
     >
       Cerrar sesión
     </Button>
