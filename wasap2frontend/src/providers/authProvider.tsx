@@ -1,63 +1,63 @@
-import { axios } from "./axiosProvider";
-import React, { useState, useEffect, useMemo } from "react";
-import Cookies from "js-cookie";
-import { AuthContext } from "./authUtils";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { UserJWT } from "../services/userService";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
-export type ContextJWT = {
-  token: string | undefined;
-  userId: string | undefined;
-  setToken: (newToken: string | undefined) => void;
+type UserContextType = {
+  token?: string | undefined;
+  userId?: string | null;
   logout: () => void;
+  login: (token: string) => void;
 };
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // State to hold the authentication token
-  //get token from cookie
-  const [token, setToken_] = useState<string | undefined>(Cookies.get("token"));
-  const [userId, setUserId] = useState<string | undefined>();
+type Props = { children: ReactNode };
 
-  // Function to set the authentication token
-  const setToken = (newToken: string | undefined) => {
-    setToken_(newToken);
+const UserContext = createContext<UserContextType>({} as UserContextType);
+
+export default function UserProvider({ children }: Props) {
+  const [token, setToken] = useState<string | undefined>();
+  const [userId, setUserId] = useState<string>();
+  const [isReady, setReady] = useState<boolean>(false);
+
+  useEffect(() => {
+    const token: string | undefined = Cookies.get("token");
+    if (!token) {
+      return setReady(true);
+    }
+    const decodedToken = jwtDecode<UserJWT>(token);
+    const userId = decodedToken?.id;
+
+    if (userId && token) {
+      setUserId(userId);
+      setToken(token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+    setReady(true);
+  }, []);
+
+  const login = (token: string): void => {
+    if (token) {
+      setToken(token);
+      const decodedToken = jwtDecode<UserJWT>(token);
+      const userId = decodedToken?.id;
+      setUserId(userId);
+      toast.success("Login Successful :)");
+    }
   };
 
-  const logout = () => {
+  const logout = (): void => {
+    Cookies.remove("token");
+    setUserId(undefined);
     setToken(undefined);
   };
 
-  useEffect(() => {
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      const payload = decodedToken as UserJWT;
-      const userId = payload.id;
-      setUserId(userId);
-    }
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-      setToken(token);
-    } else {
-      delete axios.defaults.headers.common["Authorization"];
-      setToken(undefined);
-    }
-  }, [token]);
-
-  // Memoized value of the authentication context
-  const contextValue = useMemo(
-    () => ({
-      token,
-      userId,
-      setToken,
-      logout,
-    }),
-    [token, userId],
-  );
-
-  // Provide the authentication context to the children components
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <UserContext.Provider value={{ userId, token, logout, login }}>
+      {isReady ? children : null}
+    </UserContext.Provider>
   );
-};
+}
 
-export default AuthProvider;
+export const useAuth = () => React.useContext(UserContext);

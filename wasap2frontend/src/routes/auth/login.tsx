@@ -4,15 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { userLoginSchema } from "../../../../src/schemas/userSchema";
 import { z } from "zod";
 import { useLogin } from "../../services/authService";
-import { useAuth } from "../../providers/authUtils";
+import { useAuth } from "../../providers/authProvider";
 
 import { useNavigate } from "react-router-dom";
 
 export type UserLogin = z.infer<typeof userLoginSchema>;
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const { setToken } = useAuth();
   const {
     register,
     handleSubmit,
@@ -25,7 +25,7 @@ export default function LoginPage() {
 
   console.log(isSuccess);
   if (isSuccess) {
-    if (data?.data?.token) setToken(data.data.token);
+    login(data.data.token!);
     navigate("/", { replace: true });
     return;
   }
