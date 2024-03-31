@@ -2,9 +2,9 @@ import { getApiUrl } from "../config";
 import { axios } from "../providers/axiosProvider";
 import { UserLogin } from "../routes/auth/login";
 import { UserRegister } from "../routes/auth/register";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const login = async (data: UserLogin) => {
+export const loginService = async (data: UserLogin) => {
   const loginUrl = getApiUrl("/auth/login");
   const response = await axios.post<{ token: string | null }>(loginUrl, data);
   return response;
@@ -17,8 +17,12 @@ const register = async (data: UserRegister) => {
 };
 
 export const useLogin = () => {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: UserLogin) => login(data),
+    mutationFn: (data: UserLogin) => loginService(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations", "userDetails"] });
+    },
   });
 };
 
