@@ -50,7 +50,7 @@ export default function AddContactForm({ userData }: AddContactFormProps) {
       >
         <Input
           {...register("friendUsername")}
-          placeholder="Username"
+          placeholder="Nombre de usuario"
           errorMessage={errors.friendUsername?.message || isError}
         />
         <Button

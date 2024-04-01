@@ -1,7 +1,6 @@
 //dummy ahh encryption thingy.
 import crypto from "crypto";
 import { doRandomIV, doRandomKey, toBuffer } from "./crypto_helpers";
-import { text } from "cheerio";
 
 const BASE_ENCODING = "hex";
 //all variables for crypto will start with CRYPTO prefix.

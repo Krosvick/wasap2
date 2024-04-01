@@ -1,12 +1,16 @@
 import { useLoaderData } from "react-router-dom";
 import { Conversation } from "../services/contactsService";
-import { Image, ScrollShadow } from "@nextui-org/react";
+import { Image, ScrollShadow, Card } from "@nextui-org/react";
 import SendMessage from "../components/sendMessage";
 import socket from "../providers/socketioProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 
 export default function Chat() {
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   const data = useLoaderData() as {
     conversation: Conversation;
     userId: string;
@@ -17,6 +21,7 @@ export default function Chat() {
   )?.username;
 
   const [messages, setMessages] = useState(data.conversation.messages);
+  useEffect(scrollToBottom, [messages]);
   useEffect(() => {
     //set messages watching over conversation
     setMessages(data.conversation.messages);
@@ -77,27 +82,30 @@ export default function Chat() {
     setMessages((prevMessages) => [newMessage, ...prevMessages]);
   };
   return (
-    <div className="bg-green-500 h-full w-full max-h-screen flex flex-col px-3">
-      <div className="flex w-full justify-between">
-        <h1>
-          Chat{" "}
-          {data.conversation.participants.map((participant) => (
-            <span>{participant.username} </span>
-          ))}
+    <div className="bg-green-500 h-full w-full max-h-screen flex flex-col">
+      <div className="flex w-full bg-slate-800 rounded-b-md justify-between text-white">
+        <h1 className="text-2xl font-bold text-center p-4 h-full flex gap-3 items-center">
+          Chat{" con"}
+          {data.conversation.participants
+            .filter((participant) => participant.username !== username)
+            .map((participant) => (
+              <span>{participant.username} </span>
+            ))}
         </h1>
-        <Link to="/">
+        <Link to="/" className="ml-4">
           <Image
             src="https://raw.githubusercontent.com/cirosantilli/china-dictatorship-media/master/Xi_Jinping_The_Governance_of_China_photo.jpg"
             alt="chat"
             width={100}
             height={100}
-            radius="none"
+            radius="lg"
+            className="p-3"
           />
         </Link>
       </div>
       <div className="h-full overflow-auto flex flex-col-reverse">
         <ScrollShadow>
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col">
             {messages
               .sort(
                 (a, b) =>
@@ -105,7 +113,10 @@ export default function Chat() {
                   new Date(b.createdAt).getTime(),
               )
               .map((message) => (
-                <li key={message.id} className="bg-gray-400 p-10">
+                <Card
+                  key={message.id}
+                  className={`bg-indigo-900 w-1/2 px-10 pb-6 pt-3 m-3 text-white ${message.sender.username === username ? "ml-auto bg-slate-900" : "mr-auto"}`}
+                >
                   <div className="flex justify-between mb-5">
                     <p className="text-xl font-bold">
                       {message.sender.username}
@@ -123,12 +134,13 @@ export default function Chat() {
                     </div>
                   </div>
                   {message.content}
-                </li>
+                </Card>
               ))}
           </ul>
+          <div ref={messagesEndRef} />
         </ScrollShadow>
       </div>
-      <div className="flex-shrink-0 mb-3">
+      <div className="flex-shrink-0 mb-3 px-3">
         <SendMessage
           conversationId={data.conversation.id}
           receiverId={receiverId!}
