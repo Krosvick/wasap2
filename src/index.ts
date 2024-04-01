@@ -20,6 +20,7 @@ import {
 } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
 import { LiveChatSocket, StaticChatSocket } from "./sockets/wrappers";
+import { decrypt, encrypt } from "./encryption";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -122,4 +123,7 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server is running at ${DEVELOPMENT_URL}:${PORT}`);
+  const encryted = encrypt("amongus");
+
+  console.log(encryted ? decrypt(encryted)?.toString("utf-8") : "ayuda");
 });
