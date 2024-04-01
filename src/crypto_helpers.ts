@@ -12,7 +12,11 @@ const doRandomKey = () => {
 
 const doRandomIV = () => crypto.randomBytes(IV_LENGTH);
 
-const toBuffer = (iv : string, key : string) => {
+const toBuffer = (iv? : string, key? : string) => {
+    if(!iv || !key) {
+        return [null, null];
+    }
+
     const bufferIv = Buffer.from(iv, BASE_ENCODING);
     const bufferKey = Buffer.from(key, BASE_ENCODING);
 
