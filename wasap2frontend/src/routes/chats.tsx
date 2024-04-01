@@ -1,25 +1,36 @@
 import { useLoaderData } from "react-router-dom";
+import { getConversationMessages } from "../services/contactsService";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
+import { UserJWT } from "../services/userService";
 import { Conversation } from "../services/contactsService";
 import { Image } from "@nextui-org/react";
 import SendMessage from "../components/sendMessage";
 import socket from "../providers/socketioProvider";
 
-
+export async function conversationLoader({
+  params,
+}: {
+  params: { conversationId: string };
+}) {
+  const conversationId = params.conversationId;
+  if (!Cookies.get("token")) {
+    return { conversation: null };
+  }
+  const decodedToken = jwtDecode(Cookies.get("token")!);
+  const payload = decodedToken as UserJWT;
+  const userId = payload.id;
+  const conversation = await getConversationMessages(userId, conversationId);
+  return { conversation };
+}
 export default function Chat() {
-  const data = useLoaderData() as {
-    conversation: Conversation;
-    userId: string;
-  };
-  const receiverId = data.conversation.participants.find(
-    (participant) => participant.id !== data.userId,
-  )?.id;
-  console.log(data);
+  const data = useLoaderData() as { conversation: Conversation };
   if (!data.conversation) {
     return <div>Not authorized</div>;
   }
   socket.emit("enter-conversation", data);
   return (
-    <div className="bg-green-500 h-full w-full max-h-screen flex flex-col px-3">
+    <div className="bg-green-500 h-full w-full max-h-screen flex flex-col">
       <div className="flex w-full justify-between">
         <h1>
           Chat{" "}
@@ -56,11 +67,8 @@ export default function Chat() {
           ))}
         </ul>
       </div>
-      <div className="flex-shrink-0 mb-3">
-        <SendMessage
-          conversationId={data.conversation.id}
-          receiverId={receiverId!}
-        />
+      <div className="flex-shrink-0">
+        <SendMessage />
       </div>
     </div>
   );
