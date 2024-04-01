@@ -27,9 +27,8 @@ export default function Chat() {
     setMessages(data.conversation.messages);
   }, [data]);
 
-  socket.on(
-    "send-message",
-    ({
+  useEffect(() => {
+    const messageHandler = ({
       user,
       message,
       convId,
@@ -53,8 +52,15 @@ export default function Chat() {
           },
         ]);
       }
-    },
-  );
+    };
+
+    socket.on("send-message", messageHandler);
+
+    // Cleanup function to remove the event listener when the component unmounts
+    return () => {
+      socket.off("send-message", messageHandler);
+    };
+  }, []);
 
   const receiverId = data.conversation.participants.find(
     (participant) => participant.id !== data.userId,
@@ -111,6 +117,11 @@ export default function Chat() {
                 (a, b) =>
                   new Date(a.createdAt).getTime() -
                   new Date(b.createdAt).getTime(),
+              )
+              .filter(
+                (message, index, self) =>
+                  index === 0 ||
+                  message.createdAt !== self[index - 1].createdAt,
               )
               .map((message) => (
                 <Card

@@ -3,6 +3,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { UserJWT } from "../services/userService";
 import Cookies from "js-cookie";
+import socket from "./socketioProvider";
 
 type UserContextType = {
   token?: string | undefined;
@@ -38,15 +39,17 @@ export default function UserProvider({ children }: Props) {
 
   const login = (token: string): void => {
     if (token) {
+      socket.connect();
       setToken(token);
       const decodedToken = jwtDecode<UserJWT>(token);
       const userId = decodedToken?.id;
       setUserId(userId);
-    
     }
   };
 
   const logout = (): void => {
+    socket.disconnect();
+    axios.defaults.headers.common["Authorization"] = undefined;
     Cookies.remove("token");
     setUserId(undefined);
     setToken(undefined);
