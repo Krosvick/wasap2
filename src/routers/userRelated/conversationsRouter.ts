@@ -14,6 +14,7 @@ const findConversations = async (participantId: string = "") => {
       id: true,
       participants: {
         select: {
+          id: true,
           username: true,
         },
         where: {
@@ -69,7 +70,7 @@ convRouter.get(
   },
 );
 
-convRouter.get("/:convId", async (req: Request, res: Response) => {
+convRouter.get("/:convId", authenticateJWTCookie,async (req: Request, res: Response) => {
   const convId = req.params.convId;
   const conversation = await prisma.conversation.findUnique({
     where: {
@@ -79,6 +80,7 @@ convRouter.get("/:convId", async (req: Request, res: Response) => {
       id: true,
       participants: {
         select: {
+          id: true,
           username: true,
         },
       },

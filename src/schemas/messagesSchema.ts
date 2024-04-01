@@ -14,3 +14,12 @@ export const sendMessageSchema = {
     message: z.string().min(1).max(500),
   }),
 };
+
+export const sendMessageSchemaBackend = z.object({
+  message: z.string().min(1).max(500),
+  receiverId: z.string(),
+  conversationId: z.string(),
+});
+
+
+export type SendMessageTypeBackend = z.infer<typeof sendMessageSchemaBackend>;
