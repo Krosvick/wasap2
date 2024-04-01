@@ -7,7 +7,6 @@ import { emitMessage } from "../services/messageService";
 
 export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 
-//TODO
 export default function SendMessage({
   conversationId,
   receiverId,
