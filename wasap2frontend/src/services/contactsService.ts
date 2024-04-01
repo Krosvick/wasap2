@@ -18,7 +18,6 @@ const conversationSchema = z.object({
   id: z.string(),
   participants: z.array(
     z.object({
-      id: z.string(),
       username: z.string(),
     }),
   ),

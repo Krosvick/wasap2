@@ -5,6 +5,7 @@ import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
+import { Server } from "socket.io";
 import { STATUS_CODES, createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
@@ -19,8 +20,7 @@ import {
   saveMessage,
 } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
-import { LiveChatSocket, StaticChatSocket } from "./sockets/wrappers";
-import { decrypt, encrypt } from "./encryption";
+import { LiveChatSocket } from "./sockets/wrappers";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -63,7 +63,7 @@ apiRouter.use("/users", usersRouter);
 apiRouter.use("/conversations", convRouter);
 
 const server = createServer(app);
-const liveChat = new StaticChatSocket(server, {
+const liveChat = new LiveChatSocket(server, {
   cors: {
     origin: `${process.env.DEVELOPMENT_URL}:${FRONTEND_PORT}`,
     credentials: true,
@@ -123,7 +123,4 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server is running at ${DEVELOPMENT_URL}:${PORT}`);
-  const encryted = encrypt("amongus");
-
-  console.log(encryted ? decrypt(encryted)?.toString("utf-8") : "ayuda");
 });

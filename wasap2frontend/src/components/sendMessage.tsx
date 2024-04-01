@@ -8,15 +8,8 @@ import { emitMessage } from "../services/messageService";
 export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 
 //TODO
-export default function SendMessage({
-  conversationId,
-  receiverId,
-}: {
-  conversationId: string;
-  receiverId: string;
-}) {
+export default function SendMessage() {
   //simple input and button to add a contact by username
-
   const {
     register,
     handleSubmit,
@@ -25,16 +18,12 @@ export default function SendMessage({
     resolver: zodResolver(sendMessageSchema.body),
   });
 
+
   return (
     <div className="flex flex-col justify-center items-start h-fit my-2">
       <form
         onSubmit={handleSubmit((data) => {
-          const updatedData = {
-            ...data,
-            receiverId: receiverId,
-            conversationId: conversationId,
-          };
-          emitMessage(updatedData);
+          emitMessage(data);
         })}
         className="flex gap-3 w-full"
       >
@@ -46,10 +35,10 @@ export default function SendMessage({
         <Button
           type="submit"
           className="p-5"
-          color="secondary"
           isDisabled={!isDirty || !isValid}
+          color="secondary"
         >
-          Enviar
+          Send
         </Button>
       </form>
     </div>
