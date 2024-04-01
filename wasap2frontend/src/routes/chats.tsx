@@ -1,6 +1,6 @@
 import { useLoaderData } from "react-router-dom";
 import { Conversation } from "../services/contactsService";
-import { Image } from "@nextui-org/react";
+import { Image, ScrollShadow } from "@nextui-org/react";
 import SendMessage from "../components/sendMessage";
 import socket from "../providers/socketioProvider";
 import { useEffect, useState } from "react";
@@ -96,33 +96,37 @@ export default function Chat() {
         </Link>
       </div>
       <div className="h-full overflow-auto flex flex-col-reverse">
-        <ul className="flex flex-col gap-3">
-          {messages
-            .sort(
-              (a, b) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime(),
-            )
-            .map((message) => (
-              <li key={message.id} className="bg-gray-400 p-10">
-                <div className="flex justify-between mb-5">
-                  <p className="text-xl font-bold">{message.sender.username}</p>
-                  <div>
-                    <p>
-                      {new Date(message.createdAt).toLocaleString([], {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+        <ScrollShadow>
+          <ul className="flex flex-col gap-3">
+            {messages
+              .sort(
+                (a, b) =>
+                  new Date(a.createdAt).getTime() -
+                  new Date(b.createdAt).getTime(),
+              )
+              .map((message) => (
+                <li key={message.id} className="bg-gray-400 p-10">
+                  <div className="flex justify-between mb-5">
+                    <p className="text-xl font-bold">
+                      {message.sender.username}
                     </p>
+                    <div>
+                      <p>
+                        {new Date(message.createdAt).toLocaleString([], {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                {message.content}
-              </li>
-            ))}
-        </ul>
+                  {message.content}
+                </li>
+              ))}
+          </ul>
+        </ScrollShadow>
       </div>
       <div className="flex-shrink-0 mb-3">
         <SendMessage
