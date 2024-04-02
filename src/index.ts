@@ -123,7 +123,4 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server is running at ${DEVELOPMENT_URL}:${PORT}`);
-  const encryted = encrypt("amongus");
-
-  console.log(encryted ? decrypt(encryted)?.toString("utf-8") : "ayuda");
 });
