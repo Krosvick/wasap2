@@ -5,7 +5,7 @@ import { validateRequest } from "zod-express-middleware";
 import { sendMessageSchema } from "../../schemas/messagesSchema";
 import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 import { saveMessage } from "../../chat_helpers";
-import { encrypt } from "../../encryption";
+import { decrypt, encrypt } from "../../encryption";
 
 export const convRouter = Router({ mergeParams: true });
 
@@ -146,6 +146,58 @@ convRouter.post(
 
 //i like writing everything twice.
 //FIXME: THIS IS NOT SAFE FOR E2E AS WE USE THE GLOBAL KEY, BUT ASSUME THAT NOBODY KNOWS THE IV AND KEY.
+convRouter.get(
+  "/:convId/decrypted",
+  authenticateJWTCookie,
+  async (req: Request, res: Response) => {
+    const convId = req.params.convId;
+    const conversation = await prisma.conversation.findUnique({
+      where: {
+        id: convId,
+      },
+      select: {
+        id: true,
+        participants: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        messages: {
+          select: {
+            id: true,
+            content: true,
+            sender: { select: { username: true } },
+            createdAt: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
+    });
+
+    if (!conversation) {
+      res.status(StatusCodes.NOT_FOUND).send("Conversation not found!");
+      return;
+    }
+
+    //there should be a better way to do this.
+    conversation.messages.forEach((msg) => {
+      const content = msg.content;
+      const decrypted = decrypt(Buffer.from(content))?.toString('hex');
+
+      if(!decrypted) {
+        return;
+      }
+
+      msg.content = decrypted;
+    })
+
+    res.json(conversation);
+  },
+);
+
 convRouter.post(
   "/:convId/sendEncrypted",
   validateRequest(sendMessageSchema),
