@@ -5,6 +5,7 @@ import { validateRequest } from "zod-express-middleware";
 import { sendMessageSchema } from "../../schemas/messagesSchema";
 import { authenticateJWTCookie } from "../../middleware/jwtMiddleware";
 import { saveMessage } from "../../chat_helpers";
+import { encrypt } from "../../encryption";
 
 export const convRouter = Router({ mergeParams: true });
 
@@ -142,3 +143,45 @@ convRouter.post(
     res.json({ message: "Message sent" });
   },
 );
+
+//i like writing everything twice.
+//FIXME: THIS IS NOT SAFE FOR E2E AS WE USE THE GLOBAL KEY, BUT ASSUME THAT NOBODY KNOWS THE IV AND KEY.
+convRouter.post(
+  "/:convId/sendEncrypted",
+  validateRequest(sendMessageSchema),
+  authenticateJWTCookie,
+  async (req, res) => {
+    //retrieve the sender from the url
+    const sender = req.params.username;
+    const convId = req.params.convId;
+    //retrieve the message from the body
+    const { message } = req.body;
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id: convId,
+        participants: {
+          some: {
+            username: sender,
+          },
+        },
+      },
+    });
+    if (!conversation) {
+      //conversation must exist before sending a message
+      res.json({ error: "Conversation does not exist" });
+      return;
+    }
+
+    const encryptedMsg = encrypt(message)?.toString('hex');
+
+    if(!encryptedMsg) {
+      res.status(StatusCodes.BAD_REQUEST).json({error: "Message can't be encrypted for some reason."});
+      return;
+    }
+  
+    await saveMessage(convId, encryptedMsg, sender);
+
+    res.json({ message: "Message sent" });
+  },
+);
+
