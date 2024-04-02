@@ -5,22 +5,18 @@ import { usersRouter } from "./routers/usersRouter";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
-import { STATUS_CODES, createServer } from "node:http";
+import { createServer } from "node:http";
 import { join } from "node:path";
 import { convRouter } from "./routers/userRelated/conversationsRouter";
 import cookieParser from "cookie-parser";
-import { LOG_TYPES, debugLogs, getCookieFromSocket, getToken } from "./helpers";
-import prisma from "./db/prisma";
+import { getToken } from "./helpers";
 import { authenticateJWTCookie } from "./middleware/jwtMiddleware";
 import {
-  leaveRoom,
-  ISocketInfo,
   isValidConversation,
-  saveMessage,
 } from "./chat_helpers";
 import { StatusCodes } from "http-status-codes";
-import { LiveChatSocket, StaticChatSocket } from "./sockets/wrappers";
-import { decrypt, encrypt } from "./encryption";
+import {  StaticChatSocket } from "./sockets/wrappers";
+//import { decrypt, encrypt } from "./encryption";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
