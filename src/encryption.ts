@@ -1,8 +1,8 @@
 //dummy ahh encryption thingy.
 import crypto from "crypto";
-import { doRandomIV, doRandomKey, toBuffer } from "./crypto_helpers";
+import { toBuffer } from "./crypto_helpers";
 
-const BASE_ENCODING = "hex";
+
 //all variables for crypto will start with CRYPTO prefix.
 const ALGORITHM = process.env.CRYPTO_ALGORITHM;
 
@@ -10,9 +10,6 @@ const ALGORITHM = process.env.CRYPTO_ALGORITHM;
 const KEY = process.env.CRYPTO_KEY;//crypto.randomBytes(32);
 //This 16.
 const IV = process.env.CRYPTO_IV;//crypto.randomBytes(16);
-
-const randIv = doRandomIV();
-const key = doRandomKey();
 
 function encrypt(textData : string) {
     const [ivBuffer, ivKey] = toBuffer(IV, KEY);
@@ -38,4 +35,5 @@ function decrypt(buffer : Buffer) {
     const decipher = crypto.createDecipheriv(ALGORITHM, ivKey, ivBuffer);
     return Buffer.concat([decipher.update(buffer), decipher.final()]);
 }
+
 export {encrypt, decrypt};
