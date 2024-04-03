@@ -143,9 +143,9 @@ class StaticChatSocket extends BaseSocket {
   override async onMessageSend(socket: Socket, data: SendMessageTypeBackend) {
     const cookief = this.getCookies(socket);
     const userId = getCookieFromSocket(cookief);
+    console.log(`Received message from ${userId}:`, data);
 
     const { conversationId, message, receiverId } = data;
-
 
     if (!userId) {
       return;
@@ -208,7 +208,7 @@ class StaticChatSocket extends BaseSocket {
       LOG_TYPES.INFO,
       `Saving to DB: User: ${user.username} Message: ${data.message}`,
     );
-
+    console.log("Saving to DB: ", conversationId, data.message, user.username);
     await saveMessage(conversationId, data.message, user.username)
       .then((message) => {
         console.log("Message saved!", message.id);
