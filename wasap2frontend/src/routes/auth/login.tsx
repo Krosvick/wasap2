@@ -5,6 +5,7 @@ import { userLoginSchema } from "../../../../src/schemas/userSchema";
 import { z } from "zod";
 import { useLogin } from "../../services/authService";
 import { useAuth } from "../../providers/authProvider";
+import type { AxiosError } from "axios";
 
 import { useNavigate } from "react-router-dom";
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
     resolver: zodResolver(userLoginSchema),
   });
 
-  const { mutateAsync, isSuccess, data } = useLogin();
+  const { mutateAsync, isSuccess, data, error, isError } = useLogin();
 
   console.log(isSuccess);
   if (isSuccess) {
@@ -32,21 +33,26 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen">
-      <h1 className="text-4xl font-bold pb-5">Login</h1>
+      <h1 className="text-4xl font-bold pb-5">Inicio de sesión</h1>
       <div className="flex flex-col items-center justify-center">
         <form
           onSubmit={handleSubmit((data) => mutateAsync(data))}
           className="flex flex-col items-center justify-center gap-3"
         >
+          {isError && (
+            <p className="text-red-600">
+              Comprueba tus credenciales de usuario
+            </p>
+          )}
           <Input
             {...register("username")}
-            placeholder="Username"
+            placeholder="Nombre de usuario"
             className="w-80"
             errorMessage={errors.username?.message}
           />
           <Input
             {...register("password")}
-            placeholder="Password"
+            placeholder="Contraseña"
             type="password"
             className="w-80"
             errorMessage={errors.password?.message}
@@ -56,10 +62,10 @@ export default function LoginPage() {
             className="w-80"
             isDisabled={!isDirty || !isValid}
           >
-            Login
+            Iniciar sesión
           </Button>
           <Button onClick={() => navigate("/register")} className="w-80">
-            Register
+            Registrarse
           </Button>
         </form>
       </div>

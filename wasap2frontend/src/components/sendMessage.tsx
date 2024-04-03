@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { sendMessageSchema } from "../../../src/schemas/messagesSchema";
 import { z } from "zod";
 import { emitMessage } from "../services/messageService";
+import { useState, useEffect } from "react";
 
 export type sendMessage = z.infer<typeof sendMessageSchema.body>;
 
@@ -22,7 +23,18 @@ export default function SendMessage({
     createdAt: string;
   }) => void;
 }) {
-  //simple input and button to add a contact by username
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      const inputElement = document.querySelector(
+        'input[name="message"]',
+      ) as HTMLInputElement;
+      inputElement?.focus();
+      setIsSubmitted(false);
+    }
+  }, [isSubmitted]);
+
   const {
     register,
     handleSubmit,
@@ -48,6 +60,8 @@ export default function SendMessage({
             ...data,
             createdAt,
           });
+          setIsSubmitted(true);
+          reset();
         })}
         className="flex gap-3 w-full"
       >
@@ -56,6 +70,7 @@ export default function SendMessage({
           placeholder="Mensaje"
           type="text"
           autoFocus
+          autoComplete="off"
           errorMessage={errors.message?.message}
         />
         <Button

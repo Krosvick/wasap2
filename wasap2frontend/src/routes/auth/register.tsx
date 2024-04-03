@@ -29,8 +29,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-screen pb-5">
-      <h1 className="text-4xl font-bold pb-5">Register</h1>
+    <div className="flex flex-col items-center justify-center h-screen w-screen pb-5">
+      <h1 className="text-4xl font-bold pb-5">Registro</h1>
       <div className="flex flex-col items-center justify-center">
         <form
           onSubmit={handleSubmit((data) => mutateAsync(data))}
@@ -38,7 +38,7 @@ export default function RegisterPage() {
         >
           <Input
             {...register("username")}
-            placeholder="Username"
+            placeholder="Nombre de usuario"
             className="w-80"
             errorMessage={errors.username?.message}
           />
@@ -50,7 +50,7 @@ export default function RegisterPage() {
           />
           <Input
             {...register("password")}
-            placeholder="Password"
+            placeholder="Contraseña"
             className="w-80"
             errorMessage={errors.password?.message}
           />
@@ -59,7 +59,7 @@ export default function RegisterPage() {
             className="w-80"
             isDisabled={!isDirty || !isValid}
           >
-            Register
+            Registrarse
           </Button>
         </form>
       </div>

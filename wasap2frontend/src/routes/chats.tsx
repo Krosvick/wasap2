@@ -60,7 +60,7 @@ export default function Chat() {
     return () => {
       socket.off("send-message", messageHandler);
     };
-  }, []);
+  });
 
   const receiverId = data.conversation.participants.find(
     (participant) => participant.id !== data.userId,
