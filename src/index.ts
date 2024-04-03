@@ -17,6 +17,7 @@ import {
 import { StatusCodes } from "http-status-codes";
 import {  StaticChatSocket } from "./sockets/wrappers";
 //import { decrypt, encrypt } from "./encryption";
+import swaggerUi from "swagger-ui-express";
 
 const VIEWS_DIR = join(__dirname, "..", "pseudoviews");
 
@@ -111,6 +112,16 @@ app.get(
 
     res.sendFile(VIEWS_DIR + "/conversation_live.html");
   },
+);
+
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(undefined, {
+    swaggerOptions: {
+      url: "/swagger.json",
+    },
+  })
 );
 
 //display this url on the message.
